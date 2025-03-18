@@ -1,23 +1,23 @@
+// Environment Variables
 import dotenv from "dotenv";
-dotenv.config();
 
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import { errorHandler } from '@middleware/error-handler';
-import { notFoundHandler } from '@middleware/not-found-handler';
 
-import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
+// Better-Auth
+import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
 
-// Import feature routers
 import { userRouter } from './routes/user.route';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Logger setup
+// Pino Logger
 const logger = pinoHttp({
   transport: {
     target: 'pino-pretty',
@@ -27,43 +27,46 @@ const logger = pinoHttp({
   }
 });
 
+// Better-Auth Handler
+// This must come before express.json() middleware
 app.all("/api/auth/*", toNodeHandler(auth));
 
 // Middleware
 app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(
   cors({
-    origin: `http://localhost:/ ${process.env.PORT}`, // Replace with your frontend's origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    // Allow request from your Next.js frontend
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    
+    // Specify allowed methods
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    
+    // Allow credentials (cookies, authorization headers)
+    credentials: true,
+    
+    // Allow these headers to be sent
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    
+    // Expose these headers to the browser
+    exposedHeaders: ['Set-Cookie'],
+    
+    // Pre-flight requests will be cached for 1 hour
+    maxAge: 3600
   })
 );
+
+// Helmet is currently disabled to avoid issues during development
+// Uncomment in production for additional security headers
 // app.use(helmet());
 
-
 // Routes
-app.use('/api/users', userRouter);
-
-// Error handling
-app.use(notFoundHandler);
-app.use(errorHandler);
+app.use('/api/user', userRouter);
 
 app.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${process.env.PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 export default app;
-
-/*
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "./auth"; //your better auth instance
- 
-app.get("/api/me", async (req, res) => {
- 	const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
-	return res.json(session);
-});
-*/

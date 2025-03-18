@@ -3,6 +3,7 @@
 import React from "react";
 
 import { cn } from "@/lib/utils";
+import { fetchApi } from "@/lib/api";
 
 // Zod
 import { z } from "zod";
@@ -79,9 +80,31 @@ export function SignUpForm({
         setIsPasswordVisible((state) => !state);
     };
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log(values);
-    } 
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        setLoading(true);        
+        try {
+            const response = await fetchApi("/api/user/sign-up", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: values.email,
+                    password: values.password,
+                    name: `${values.firstName} ${values.lastName}`,
+                    phone: values.phone
+                }),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Sign up failed with status: ${response.status}`);
+            }
+            
+            window.location.href = "/dashboard";
+        } catch (error: any) {
+            console.error("Sign up error:", error);
+            // TODO: Display error to user
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className={cn("flex flex-col gap-4", className)} {...props}>

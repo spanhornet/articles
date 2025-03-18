@@ -1,23 +1,14 @@
 // Environment Variables
-import { config } from 'dotenv';
+import dotenv from "dotenv";
 
 // Drizzle ORM
 import { db, schema } from "@repo/database";
 
-// Better Auth
+// Bette Auth
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-config({ path: '.env' });
-
-/*
-    socialProviders: { 
-        google: { 
-            clientId: process.env.GOOGLE_CLIENT_ID!, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!, 
-        }, 
-    }
-*/
+dotenv.config();
  
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
