@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "@routes/*": ["src/routes/*"],
+      "@controllers/*": ["src/controllers/*"]
+    }
+  }
+}

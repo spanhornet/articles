@@ -22,7 +22,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -78,7 +78,6 @@ export function SignInForm({
         <div className={cn("flex flex-col gap-4", className)} {...props}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-                    {/* `email` field */}
                     <FormField
                         control={form.control}
                         name="email"
@@ -94,7 +93,6 @@ export function SignInForm({
                             </FormItem>
                         )}
                     />
-                    {/* `password` field */}
                     <FormField
                         control={form.control}
                         name="password"
@@ -128,7 +126,7 @@ export function SignInForm({
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full hover:cursor-pointer" disabled={isLoading}>
                         {isLoading ? (
                             <>
                                 <LoaderCircle className="animate-spin" />

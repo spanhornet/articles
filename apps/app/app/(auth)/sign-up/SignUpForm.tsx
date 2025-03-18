@@ -88,15 +88,13 @@ export function SignUpForm({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                     <div className="grid grid-cols-2 gap-4">
-                        {/* `firstName` field */}
                         <FormField
                             control={form.control}
                             name="firstName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        First name
-                                        <span className="text-destructive">*</span>
+                                        First name <span className="text-destructive">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <Input placeholder="John" {...field} />
@@ -105,15 +103,13 @@ export function SignUpForm({
                                 </FormItem>
                             )}
                         />
-                        {/* `lastName` field */}
                         <FormField
                             control={form.control}
                             name="lastName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        Last name
-                                        <span className="text-destructive">*</span>
+                                        Last name <span className="text-destructive">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <Input placeholder="Doe" {...field} />
@@ -123,15 +119,13 @@ export function SignUpForm({
                             )}
                         />
                     </div>
-                    {/* `email` field */}
                     <FormField
                         control={form.control}
                         name="email"
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>
-                                Email address
-                                <span className="text-destructive">*</span>
+                                Email address <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                                 <Input placeholder="johndoe@example.com" {...field} />
@@ -140,15 +134,13 @@ export function SignUpForm({
                             </FormItem>
                         )}
                     />
-                    {/* `phone` field */}
                     <FormField
                         control={form.control}
                         name="phone"
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>
-                                Phone number 
-                                <span className="text-destructive">*</span>
+                                Phone number <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                                 <PhoneNumberInput {...field} />
@@ -157,7 +149,6 @@ export function SignUpForm({
                             </FormItem>
                         )}
                         />
-                    {/* `password` field */}
                     <FormField
                         control={form.control}
                         name="password"
@@ -191,7 +182,7 @@ export function SignUpForm({
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full hover:cursor-pointer" disabled={isLoading}>
                         {isLoading ? (
                             <>
                                 <LoaderCircle className="animate-spin" />
