@@ -1,5 +1,5 @@
 {
-  "name": "Articles",
+  "name": "articles",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -8,6 +8,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
   },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "devDependencies": {
     "prettier": "^3.5.3",
     "turbo": "^2.4.4",

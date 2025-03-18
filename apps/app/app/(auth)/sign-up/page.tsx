@@ -1,7 +1,7 @@
 // `SignUpForm.tsx`
 import { SignUpForm } from "./SignUpForm"
 
-export default function Page() {
+export default async function Page() {
     return (
         <>
             <div className="mb-8 text-center">

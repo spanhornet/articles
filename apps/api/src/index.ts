@@ -28,8 +28,14 @@ const logger = pinoHttp({
 app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
-app.use(cors());
+// app.use(helmet());
+/*
+app.use(cors({
+  origin: 'http://localhost:3234',  // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+*/
 
 // Routes
 app.use('/api/users', userRouter);

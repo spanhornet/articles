@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { 
     pgTable, 
     text, 
@@ -10,12 +11,12 @@ export const users = pgTable("users", {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
-    emailVerified: boolean("email_verified").notNull(),
+    emailVerified: boolean("email_verified").notNull().default(false),
     image: text("image"),
     phone: text("phone"),
     role: text("role").default("STUDENT"),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at").notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
 
 export const sessions = pgTable("sessions", {

@@ -9,7 +9,7 @@
       "@config/*": ["src/config/*"],
       "@features/*": ["src/features/*"],
       "@middleware/*": ["src/middleware/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/lib/*"]
     },
     "outDir": "dist",
     "esModuleInterop": true,

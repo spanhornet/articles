@@ -1,9 +1,11 @@
-import express from 'express';
-import { getUsers, getUserById } from '../controllers/user.controller';
+import express, { Request, Response } from 'express';
+import { getUser } from '../controllers/user.controller';
 
 const router = express.Router();
 
-router.get('/', getUsers);
-router.get('/:id', getUserById);
+router.get('/', async (req: Request, res: Response) => {
+    const user = await getUser(req, res);
+    res.json(user);
+});
 
 export { router as userRouter };
