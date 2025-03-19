@@ -61,8 +61,8 @@ export const verifications = pgTable("verifications", {
 
 export const courses = pgTable("courses", {
     id: uuid("id").defaultRandom().primaryKey(),
-    title: text("title").notNull(),
-    description: text("description").notNull(),
+    title: text("title").notNull().default(""),
+    description: text("description").notNull().default(""),
     teacherId: text("teacher_id").notNull().references(() => users.id),
     teacherName: text("teacher_name").notNull(),
     image: text("image"),
