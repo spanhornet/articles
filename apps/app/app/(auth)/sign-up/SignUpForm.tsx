@@ -97,7 +97,7 @@ export function SignUpForm({
                 throw new Error(`Sign up failed with status: ${response.status}`);
             }
             
-            window.location.href = "/dashboard";
+            window.location.href = "/student";
         } catch (error: any) {
             console.error("Sign up error:", error);
             // TODO: Display error to user

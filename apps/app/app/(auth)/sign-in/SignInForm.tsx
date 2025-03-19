@@ -87,7 +87,7 @@ export function SignInForm({
                 throw new Error(`Sign in failed with status: ${response.status}`);
             }
             
-            window.location.href = "/dashboard"
+            window.location.href = "/student";
         } catch (error: any) {
             console.error('Sign in error:', error);
             // TODO: Display error to user
