@@ -1,8 +1,14 @@
 "use client"
 
 import { ReactNode, useEffect } from 'react';
+
+// Next.js Hooks
 import { useRouter, usePathname } from 'next/navigation';
+
+// Authorization
 import { useAuth } from '@/hooks/useAuth';
+
+// Lucide Icons 
 import { LoaderCircle } from 'lucide-react';
 
 type AuthGuardProps = {
@@ -20,7 +26,7 @@ export function AuthGuard({
     authRequired = false,
     guestOnly = false,
     redirectTo = '/',
-    redirectIfAuthorized = '/dashboard',
+    redirectIfAuthorized = '/student',
 }: AuthGuardProps) {
     const { user, loading } = useAuth()
 

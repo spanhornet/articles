@@ -17,7 +17,7 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard authRequired allowedRoles={["STUDENT", "TEACHER"]} redirectTo="/sign-in">
+    <AuthGuard authRequired allowedRoles={["TEACHER"]} redirectTo="/sign-in">
         <div className="flex min-h-screen flex-col">
             <header className="border-b py-4">
                 <Container className="flex items-center justify-between">
