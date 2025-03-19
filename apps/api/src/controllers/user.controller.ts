@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth';
-import { db } from '@repo/database';
 
 export const getUser = async (req: Request, res: Response) => {
   try {
@@ -27,10 +26,6 @@ export const getUser = async (req: Request, res: Response) => {
 export const signIn = async (req: Request, res: Response) => {
   try {
     const { email, password, rememberMe = true } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
 
     // Use Better-Auth to sign in
     const response = await auth.api.signInEmail({
@@ -66,10 +61,6 @@ export const signUp = async (req: Request, res: Response) => {
   try {
     const { email, password, name, phone } = req.body;
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ message: 'Email, password, and name are required' });
-    }
-
     // Use Better-Auth to sign up
     const response = await auth.api.signUpEmail({
       body: {
@@ -77,7 +68,6 @@ export const signUp = async (req: Request, res: Response) => {
         password,
         name,
         phone: phone || '',
-        // Add additional fields as needed
         role: 'STUDENT', // Default role
       },
       headers: fromNodeHeaders(req.headers),

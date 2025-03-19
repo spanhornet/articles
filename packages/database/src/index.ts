@@ -18,4 +18,4 @@ export const client = postgres(connectionString, { prepare: false });
 export const db = drizzle(client);
 
 export * as schema from './schema';
-export * as types from './types';
+export * from './types';
