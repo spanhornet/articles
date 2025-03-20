@@ -11,6 +11,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
 
 import { userRouter } from './routes/user.route';
+import { courseRouter } from "./routes/course.route";
 
 dotenv.config();
 
@@ -62,8 +63,9 @@ app.use(
 // Uncomment in production for additional security headers
 // app.use(helmet());
 
-// Routes
+// Routers
 app.use('/api/user', userRouter);
+app.use('/api/course', courseRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
