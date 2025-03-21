@@ -50,10 +50,6 @@ export default function Layout({
                 </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <div className="hidden sm:inline-flex text-muted-foreground items-center gap-1.5">
-                <CalendarClockIcon size={16} aria-hidden="true" />
-                Last saved at 11:59 PM
-            </div>
             </Container>
         </header>
         <main>{children}</main>

@@ -3,8 +3,9 @@ import React from "react";
 
 // Authorization
 import { AuthGuard } from "@/app/(auth)/AuthGuard";
+import { ProfileDropdown } from "../(auth)/ProfileDropdown";
 
-// UI Components
+// Shadcn/UI Components
 import { ModeToggle } from "@/components/mode-toggle";
 import { Container } from "@/components/container";
 
@@ -24,7 +25,10 @@ export default function Layout({
                     <Link href="/teacher" className="text-xl">
                         Articles
                     </Link>
-                    <ModeToggle />
+                    <div className="flex gap-2">
+                        <ModeToggle />
+                        <ProfileDropdown />
+                    </div>
                 </Container>
             </header>
             <main className="flex-1">

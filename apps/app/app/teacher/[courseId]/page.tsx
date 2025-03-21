@@ -17,15 +17,13 @@ export default function Page() {
       <Container>
         <div className="md:flex md:items-center md:justify-between py-6">
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-bold">Course Editor</h2>
-            <p className="text-muted-foreground mt-1">Course ID: {courseId}</p>
+            <h2 className="text-2xl font-bold">Course editor</h2>
           </div>
           <div className="mt-4 flex md:ml-4 md:mt-0">
             <Button variant="outline">Save</Button>
             <Button variant="default" className="ml-3">Publish</Button>
           </div>
         </div>
-
         <div className="border rounded-lg p-6 bg-card">
           <p className="text-center text-muted-foreground">
             This page is under construction. You will be able to edit your course content here.

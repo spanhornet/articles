@@ -96,16 +96,12 @@ export default function Page() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="text-muted-foreground inline-flex items-center gap-1.5">
-            <NotebookTextIcon size={16} aria-hidden="true" />
-            19 courses
-          </div>
         </Container>
       </header>
       <main className="py-6">
         <Container>
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Your Courses</h1>
+            <h1 className="text-2xl font-bold">Teacher view</h1>
             <Button onClick={() => setIsDialogOpen(true)}>
               <PlusIcon className="h-4 w-4" /> New course
             </Button>
