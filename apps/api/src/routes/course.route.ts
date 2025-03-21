@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCourse, getTeacherCourses, getCourse } from "../controllers/course.controller";
+import { createCourse, getTeacherCourses, getCourse, updateCourse } from "../controllers/course.controller";
 
 const router = express.Router();
 
@@ -16,5 +16,8 @@ router.get('/', asyncHandler(getTeacherCourses));
 
 // Get a specific course
 router.get('/:courseId', asyncHandler(getCourse));
+
+// Update a course
+router.put('/:courseId', asyncHandler(updateCourse));
 
 export { router as courseRouter };

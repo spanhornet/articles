@@ -106,3 +106,54 @@ export const getCourse = async (req: Request, res: Response) => {
     return res.status(500).json({ message: error.message || 'An error occurred while fetching the course' });
   }
 };
+
+// Update a course
+export const updateCourse = async (req: Request, res: Response) => {
+  try {
+    // Get the authenticated user session
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    // Check if user is authenticated
+    if (!session || !session.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { courseId } = req.params;
+    const { title, description } = req.body;
+
+    // Get the current course
+    const course = await db.select().from(schema.courses)
+      .where(eq(schema.courses.id, courseId))
+      .limit(1);
+
+    if (!course || course.length === 0) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Check if the user is the teacher of the course
+    if (course[0].teacherId !== session.user.id) {
+      return res.status(403).json({ message: 'You do not have permission to update this course' });
+    }
+
+    // Update the course
+    await db.update(schema.courses)
+      .set({ 
+        title, 
+        description,
+        updatedAt: new Date()
+      })
+      .where(eq(schema.courses.id, courseId));
+
+    // Return the updated course
+    return res.status(200).json({ 
+      id: courseId,
+      title,
+      description
+    });
+  } catch (error: any) {
+    console.error('Update course error:', error);
+    return res.status(500).json({ message: error.message || 'An error occurred while updating the course' });
+  }
+};
