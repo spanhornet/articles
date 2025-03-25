@@ -1,5 +1,5 @@
 {
-  "name": "consider",
+  "name": "articles",
   "private": true,
   "scripts": {
     "build": "turbo run build",
