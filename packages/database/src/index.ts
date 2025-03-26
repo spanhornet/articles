@@ -22,3 +22,6 @@ export * as schema from './schema';
 
 export type User = typeof schema.users.$inferSelect;
 export type UserInsert = typeof schema.users.$inferInsert;
+
+export type Course = typeof schema.courses.$inferSelect;
+export type CourseInsert = typeof schema.courses.$inferInsert;
