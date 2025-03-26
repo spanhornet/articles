@@ -5,9 +5,6 @@ import { db, schema } from "@repo/database";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-// Better Auth Plugins
-import { nextCookies } from "better-auth/next-js";
-
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -22,12 +19,6 @@ export const auth = betterAuth({
   },
   user: {
     modelName: "users",
-    fields: {
-      name: undefined,
-      email: "email",
-      emailVerified: "email_verified",
-      image: "image",
-    },
     additionalFields: {
       firstName: {
         type: "string",
@@ -48,6 +39,5 @@ export const auth = betterAuth({
         required: false,
       },
     },
-  },
-  plugins: [nextCookies()]
+  }
 });

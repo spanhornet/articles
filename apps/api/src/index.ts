@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     // Allow request from your Next.js frontend
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: "http://localhost:3000",
     
     // Specify allowed methods
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

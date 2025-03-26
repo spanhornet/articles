@@ -67,6 +67,8 @@ export const signUp = async (req: Request, res: Response) => {
       password
      } = req.body;
 
+     console.log(firstName, lastName, email, phone, password);
+
     // Use Better-Auth to sign up
     const response = await auth.api.signUpEmail({
       body: {

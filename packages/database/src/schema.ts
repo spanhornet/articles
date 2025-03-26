@@ -12,8 +12,9 @@ export const userRoleEnum = pgEnum("user_role", ["STUDENT", "TEACHER"]);
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
+  name: text("name").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
   email: varchar("email", { length: 256 }).unique().notNull(),
   emailVerified: boolean("email_verified").default(false),
   phone: varchar("phone", { length: 256 }),

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 
 // Shadcn/ui Components
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 // Google Fonts
 import { Geist, Geist_Mono } from "next/font/google";
@@ -39,6 +40,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster />
           { children }
         </ThemeProvider>
       </body>

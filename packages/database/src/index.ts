@@ -13,8 +13,7 @@ if (!process.env.SUPABASE_DATABASE_URL) {
     throw new Error("SUPABASE_DATABASE_URL is not set in the environment variables");
 }
 
-const connectionString = process.env.SUPABASE_DATABASE_URL;
-const client = postgres(connectionString, { prepare: false });
+const client = postgres(process.env.SUPABASE_DATABASE_URL, { prepare: false });
 
 export const db = drizzle(client);
 export * as schema from './schema';
