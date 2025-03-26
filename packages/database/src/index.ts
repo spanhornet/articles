@@ -7,6 +7,8 @@ import * as dotenv from 'dotenv';
 // Drizzle ORM
 import { drizzle } from 'drizzle-orm/postgres-js';
 
+import type { schema } from './schema';
+
 dotenv.config();
 
 if (!process.env.SUPABASE_DATABASE_URL) {
@@ -17,3 +19,6 @@ const client = postgres(process.env.SUPABASE_DATABASE_URL, { prepare: false });
 
 export const db = drizzle(client);
 export * as schema from './schema';
+
+export type User = typeof schema.users.$inferSelect;
+export type UserInsert = typeof schema.users.$inferInsert;

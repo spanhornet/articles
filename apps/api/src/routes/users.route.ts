@@ -1,8 +1,13 @@
+// Express
 import express from "express";
+
+// Controllers
 import { getUser, signIn, signUp, signOut } from "../controllers/user.controller";
 
+// Router
 const router = express.Router();
 
+// Async Handler
 const asyncHandler = (fn: Function) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };

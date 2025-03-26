@@ -50,8 +50,6 @@ export function SignInForm({
   className,
   ...props
 } : React.ComponentPropsWithoutRef<"div">) {
-  const router = useRouter();
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,6 +57,8 @@ export function SignInForm({
       password: "",
     },
   });
+
+  const router = useRouter();
 
   const [isLoading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -69,15 +69,13 @@ export function SignInForm({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
-    
     try {
       const { data, error } = await fetchApi('/api/user/sign-in', {
         method: 'POST',
         body: JSON.stringify(values),
         showSuccessToast: true
       });
-
-      if (!error) router.push('/');
+      if (!error) router.push('/student');
     } finally {
       setLoading(false);
     }

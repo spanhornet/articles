@@ -1,3 +1,4 @@
+// Shadcn UI
 import { toast } from "sonner";
 
 if (!process.env.NEXT_PUBLIC_API_URL) {
@@ -38,8 +39,10 @@ export async function fetchApi<T = any>(
   endpoint: string, 
   options: FetchOptions = {}
 ): Promise<ApiResponse<T>> {
+  // Define the URL
   const url = `${API_BASE_URL}${endpoint}`;
   
+  // Define the options
   const {
     showSuccessToast = true,
     showErrorToast = true,
@@ -48,6 +51,7 @@ export async function fetchApi<T = any>(
     ...fetchOptions
   } = options;
   
+  // Define the default options
   const defaultOptions: RequestInit = {
     credentials: "include",
     headers: {
@@ -56,6 +60,7 @@ export async function fetchApi<T = any>(
     },
   };
 
+  // Try to fetch the data
   try {
     const response = await fetch(url, {
       ...defaultOptions,
@@ -66,6 +71,7 @@ export async function fetchApi<T = any>(
     let responseData;
     const contentType = response.headers.get("content-type");
     
+    // Check if the response is JSON
     if (contentType?.includes("application/json")) {
       responseData = await response.json();
     } else {

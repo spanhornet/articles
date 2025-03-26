@@ -3,6 +3,9 @@ import "./globals.css";
 // Next.js Metadata API
 import type { Metadata } from "next";
 
+// AuthProvider
+import { AuthProvider } from "@/app/(auth)/AuthProvider";
+
 // Shadcn/ui Components
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,8 +43,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
-          { children }
+          <AuthProvider>
+            <Toaster richColors position="bottom-center"/>
+            { children }
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

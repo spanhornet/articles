@@ -1,6 +1,9 @@
+// Express
 import { Request, Response } from "express";
-import { fromNodeHeaders } from "better-auth/node";
+
+// Better-Auth
 import { auth } from "../auth";
+import { fromNodeHeaders } from "better-auth/node";
 import { APIError } from "better-auth/api";
 
 export const getUser = async (req: Request, res: Response) => {
@@ -41,7 +44,7 @@ export const getUser = async (req: Request, res: Response) => {
     return res.status(500).json({
       title: "Server Error",
       message: "An error occurred while retrieving user information",
-      details: process.env.NODE_ENV === 'development' ? { error: error.message } : undefined
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
     });
   }
 };
@@ -119,7 +122,7 @@ export const signIn = async (req: Request, res: Response) => {
     return res.status(500).json({
       title: "Server Error",
       message: error.message || "An error occurred during sign in",
-      details: process.env.NODE_ENV === 'development' ? { error: error.stack } : undefined
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.stack } : undefined
     });
   }
 };
@@ -180,7 +183,7 @@ export const signUp = async (req: Request, res: Response) => {
     if (response.ok) {
       return res.status(status).json({
         title: "Sign Up Successful",
-        message: `Welcome, ${firstName}! Your account has been created successfully.`,
+        message: `Welcome! Your account has been created successfully.`,
         ...body
       });
     }
@@ -222,7 +225,7 @@ export const signUp = async (req: Request, res: Response) => {
     return res.status(500).json({
       title: "Server Error",
       message: error.message || "An error occurred during sign up",
-      details: process.env.NODE_ENV === 'development' ? { error: error.stack } : undefined
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.stack } : undefined
     });
   }
 };
@@ -279,7 +282,7 @@ export const signOut = async (req: Request, res: Response) => {
     return res.status(500).json({
       title: "Server Error",
       message: error.message || "An error occurred during sign out",
-      details: process.env.NODE_ENV === 'development' ? { error: error.stack } : undefined
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.stack } : undefined
     });
   }
 };

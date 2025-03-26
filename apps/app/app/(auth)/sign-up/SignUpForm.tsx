@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 
 // Next.js Hooks
 import { useRouter } from "next/navigation";
+
 // Shadcn/ui Components
 import { Button } from "@/components/ui/button";
 import {
@@ -57,8 +58,6 @@ export function SignUpForm({
   className,
   ...props
 } : React.ComponentPropsWithoutRef<"div">) {
-  const router = useRouter();
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,6 +69,8 @@ export function SignUpForm({
     },
   });
 
+  const router = useRouter();
+
   const [isLoading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -79,15 +80,13 @@ export function SignUpForm({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
-    
     try {
       const { data, error } = await fetchApi('/api/user/sign-up', {
         method: 'POST',
         body: JSON.stringify(values),
         showSuccessToast: true
       });
-
-      if (!error) router.push('/dashboard');
+      if (!error) router.push('/student');
     } finally {
       setLoading(false);
     }
