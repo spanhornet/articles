@@ -6,79 +6,136 @@ if (!process.env.NEXT_PUBLIC_API_URL) {
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type ApiResponse<T> = {
-  data: T | null;
-  error: string | null;
+// Define response types
+export type ApiSuccess<T> = {
+  data: T;
+  error: null;
   status: number;
+  message?: string;
+  title?: string;
+};
+
+export type ApiError = {
+  data: null;
+  error: {
+    message: string;
+    title?: string;
+    details?: any;
+  };
+  status: number;
+};
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+type FetchOptions = RequestInit & {
+  showSuccessToast?: boolean;
+  showErrorToast?: boolean;
+  successTitle?: string;
+  successMessage?: string;
 };
 
 export async function fetchApi<T = any>(
   endpoint: string, 
-  options: RequestInit = {}
+  options: FetchOptions = {}
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  const {
+    showSuccessToast = true,
+    showErrorToast = true,
+    successTitle = "Success",
+    successMessage,
+    ...fetchOptions
+  } = options;
+  
   const defaultOptions: RequestInit = {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   };
 
   try {
     const response = await fetch(url, {
       ...defaultOptions,
-      ...options,
+      ...fetchOptions,
     });
 
-    console.log(response);
-
-    // Try to parse the response as JSON
-    let data = null;
-    let error = null;
+    // Parse response body
+    let responseData;
+    const contentType = response.headers.get("content-type");
     
-    try {
-      data = await response.json();
-    } catch (e) {
-      // Response was not JSON
+    if (contentType?.includes("application/json")) {
+      responseData = await response.json();
+    } else {
+      const text = await response.text();
+      responseData = text.length ? { message: text } : {};
     }
 
-    // Handle error responses
-    if (!response.ok) {
-      // Extract error message
-      const errorMessage = 
-        data?.message || 
-        data?.error || 
-        `Request failed with status: ${response.status}`;
+    // Success response
+    if (response.ok) {
+      // Extract success information
+      const title = responseData.title || successTitle;
+      const message = responseData.message || successMessage || "Operation completed successfully";
       
-      // Show toast notification
-      toast.error(errorMessage);
+      // Show success toast if enabled
+      if (showSuccessToast) {
+        toast.success(title, {
+          description: message,
+        });
+      }
+      
+      return {
+        data: responseData,
+        error: null,
+        status: response.status,
+        message,
+        title
+      };
+    } else {
+      // Extract error information
+      const errorTitle = responseData?.title || "Error";
+      const errorMessage = responseData?.message || responseData?.error || `Request failed with status: ${response.status}`;
+      const errorDetails = responseData?.details;
+      
+      // Show error toast if enabled
+      if (showErrorToast) {
+        toast.error(errorTitle, {
+          description: errorMessage,
+        });
+      }
       
       return {
         data: null,
-        error: errorMessage,
+        error: {
+          message: errorMessage,
+          title: errorTitle,
+          details: errorDetails
+        },
         status: response.status
       };
     }
-
-    // Success case
-    return {
-      data,
-      error: null,
-      status: response.status
-    };
-    
   } catch (error) {
-    // Network errors or other exceptions
+    // Network or other client-side errors
+    const errorTitle = "Connection Error";
     const errorMessage = error instanceof Error 
       ? error.message 
-      : 'Unknown error occurred';
+      : 'An unknown error occurred';
     
-    toast.error(`Network error: ${errorMessage}`);
+    // Show error toast if enabled
+    if (showErrorToast) {
+      toast.error(errorTitle, {
+        description: errorMessage,
+      });
+    }
     
     return {
       data: null,
-      error: errorMessage,
+      error: {
+        message: errorMessage,
+        title: errorTitle
+      },
       status: 0 // Use 0 to indicate network/client error
     };
   }

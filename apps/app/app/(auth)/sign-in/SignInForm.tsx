@@ -4,6 +4,7 @@ import React from "react";
 
 // Utilities
 import { cn } from "@/lib/utils";
+import { fetchApi } from "@/lib/api";
 
 // Zod
 import { z } from "zod";
@@ -12,6 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // React Hooks
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+
+// Next.js Hooks
+import { useRouter } from "next/navigation";
 
 // Shadcn/ui Components
 import { Button } from "@/components/ui/button";
@@ -46,6 +50,8 @@ export function SignInForm({
   className,
   ...props
 } : React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,7 +68,19 @@ export function SignInForm({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    setLoading(true);
+    
+    try {
+      const { data, error } = await fetchApi('/api/user/sign-in', {
+        method: 'POST',
+        body: JSON.stringify(values),
+        showSuccessToast: true
+      });
+
+      if (!error) router.push('/');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

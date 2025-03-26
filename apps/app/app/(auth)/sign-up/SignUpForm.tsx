@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+// Next.js Hooks
+import { useRouter } from "next/navigation";
 // Shadcn/ui Components
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +57,8 @@ export function SignUpForm({
   className,
   ...props
 } : React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,8 +78,20 @@ export function SignUpForm({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-};
+    setLoading(true);
+    
+    try {
+      const { data, error } = await fetchApi('/api/user/sign-up', {
+        method: 'POST',
+        body: JSON.stringify(values),
+        showSuccessToast: true
+      });
+
+      if (!error) router.push('/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>
