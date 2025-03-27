@@ -156,3 +156,110 @@ export const getCourseById = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const updateCourse = async (req: Request, res: Response) => {
+  try {
+    const { courseId } = req.params;
+    const { title, description } = req.body;
+
+    // Validate input
+    if (!courseId) {
+      return res.status(400).json({
+        title: "Invalid Input",
+        message: "Course ID is required",
+        details: { missingFields: ["courseId"] }
+      });
+    }
+
+    if (!title && !description) {
+      return res.status(400).json({
+        title: "Invalid Input",
+        message: "At least one field (title or description) must be provided for update",
+        details: { missingFields: ["title", "description"] }
+      });
+    }
+
+    // Get the authenticated user session
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    // If no session, return unauthorized
+    if (!session || !session.user) {
+      return res.status(401).json({
+        title: "Authentication Required",
+        message: "You must be logged in to update a course",
+        details: { reason: "no_session" }
+      });
+    }
+
+    // First check if the course exists and belongs to the user
+    const [existingCourse] = await db.select().from(schema.courses)
+      .where(and(
+        eq(schema.courses.id, courseId),
+        eq(schema.courses.userId, session.user.id)
+      ))
+      .limit(1);
+
+    // If course not found or doesn't belong to user
+    if (!existingCourse) {
+      return res.status(404).json({
+        title: "Not Found",
+        message: "Course not found or you don't have permission to update it",
+        details: { courseId: courseId }
+      });
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      updatedAt: new Date()
+    };
+
+    // Only include fields that are provided in the request
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+
+    // Update the course in the database
+    const [updatedCourse] = await db.update(schema.courses)
+      .set(updateData)
+      .where(and(
+        eq(schema.courses.id, courseId),
+        eq(schema.courses.userId, session.user.id)
+      ))
+      .returning();
+
+    return res.status(200).json({
+      title: "Course Updated",
+      message: "Course has been updated successfully",
+      course: updatedCourse
+    });
+
+  } catch (error: any) {
+    console.error("Update course error:", error);
+    
+    // Handle specific errors from Better-Auth
+    if (error instanceof APIError) {
+      return res.status(error.statusCode).json({
+        title: "Authentication Error",
+        message: error.message || "Failed to update course",
+        details: { errorCode: error.statusCode, errorType: error.status }
+      });
+    }
+
+    // Handle database errors
+    if (error.code === '23505') { // Unique constraint violation
+      return res.status(409).json({
+        title: "Database Error",
+        message: "A course with this title already exists",
+        details: { errorCode: error.code }
+      });
+    }
+
+    // Generic error handler
+    return res.status(500).json({
+      title: "Server Error",
+      message: "An error occurred while updating the course",
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
+    });
+  }
+};

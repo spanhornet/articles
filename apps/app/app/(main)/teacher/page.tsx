@@ -58,6 +58,13 @@ export default function Page() {
               <NotebookPen size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
               <span className="text-muted-foreground">Teacher view</span>
             </span>
+          </div>
+        </Container>
+      </header>
+      <main>
+        <Container className="py-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Your courses</h1>
             <div className="flex items-center">
               <Button 
                 size="sm" 
@@ -70,7 +77,7 @@ export default function Page() {
             </div>
           </div>
         </Container>
-      </header>
+      </main>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent>
           <DialogHeader>

@@ -41,6 +41,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-publish-unpublished: oklch(0.577 0.245 27.325);
+  --color-publish-outdated: oklch(0.666 0.179 58.318);
+  --color-publish-published: oklch(0.627 0.194 149.214);
 }
 
 :root {

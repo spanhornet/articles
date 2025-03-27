@@ -90,10 +90,20 @@ export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
           )}
         />
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="hover:cursor-pointer"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
-          <Button type="submit" className="hover:cursor-pointer" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="hover:cursor-pointer" 
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
                 <LoaderCircle className="animate-spin" />

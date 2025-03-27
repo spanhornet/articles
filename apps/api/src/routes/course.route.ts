@@ -4,7 +4,8 @@ import express from "express";
 // Controllers
 import {
   createCourse,
-  getCourseById
+  getCourseById,
+  updateCourse
 } from "../controllers/course.controller";
 
 // Router
@@ -20,5 +21,8 @@ router.get("/:courseId", asyncHandler(getCourseById));
 
 // Create a course
 router.post("/", asyncHandler(createCourse));
+
+// Update a course
+router.put("/:courseId", asyncHandler(updateCourse));
 
 export { router as courseRouter };
