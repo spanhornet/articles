@@ -15,9 +15,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// Next.js Components
-import Link from "next/link";
-
 // API
 import { fetchApi } from "@/lib/api";
 
@@ -56,7 +53,7 @@ export default function Page() {
           <div className="flex items-center justify-between">
             <span className="flex items-center text-sm">
               <NotebookPen size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
-              <span className="text-muted-foreground">Teacher view</span>
+              <span className="text-muted-foreground">Teacher View</span>
             </span>
           </div>
         </Container>
@@ -67,7 +64,7 @@ export default function Page() {
             <h1 className="text-2xl font-bold">Your courses</h1>
             <div className="flex items-center">
               <Button 
-                size="sm" 
+                size="lg" 
                 className="hover:cursor-pointer"
                 onClick={onOpen}
               >
@@ -83,7 +80,7 @@ export default function Page() {
           <DialogHeader>
             <DialogTitle>Create a new course</DialogTitle>
             <DialogDescription>
-              Fill in the details below to create your new course.
+              Fill in the details below to create your new course
             </DialogDescription>
           </DialogHeader>
           <CourseForm onSubmit={onSubmit} onCancel={onClose} />

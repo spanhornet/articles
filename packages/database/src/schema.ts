@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { 
   pgTable, 
   text,
@@ -63,11 +64,27 @@ export const verifications = pgTable("verifications", {
 export const courses = pgTable("courses", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   publishedAt: timestamp("published_at"),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+});
+
+export const sections = pgTable("sections", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  author: text("author").notNull(),
+  coverImage: text("cover_image").notNull(),
+  extraImages: text("extra_images").notNull().array().default(sql`ARRAY[]::text[]`),
+  periodTags: text("period_tags").notNull().array().default(sql`ARRAY[]::text[]`),
+  mediumTags: text("medium_tags").notNull().array().default(sql`ARRAY[]::text[]`),
+  link: text("link"),
+  order: integer("order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  courseId: text("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
 });
 
 export const schema = {
@@ -76,4 +93,5 @@ export const schema = {
   accounts: accounts,
   verifications: verifications,
   courses: courses,
+  sections: sections,
 };

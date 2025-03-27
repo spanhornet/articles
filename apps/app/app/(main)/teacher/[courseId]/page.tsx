@@ -7,6 +7,9 @@ import { fetchApi } from "@/lib/api";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// React Hooks
+import { useDialog } from "@/hooks/useDialog";
+
 // Shadcn UI
 import { Container } from "@/components/container";
 import {
@@ -16,7 +19,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,7 +32,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // React Hook Form
 import { useForm } from "react-hook-form";
@@ -39,7 +48,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, PencilRuler } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus } from "lucide-react";
 
 // Drizzle ORM
 import type { Course } from "@repo/database";
@@ -56,13 +65,11 @@ export default function Page() {
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const { isOpen, onOpen, onClose } = useDialog();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-    },
+    defaultValues: { title: "", description: "" },
   });
 
   useEffect(() => {
@@ -77,10 +84,7 @@ export default function Page() {
         });
         if (!error) {
           setCourse(data.course);
-          form.reset({
-            title: data.course.title,
-            description: data.course.description || "",
-          });
+          form.reset({ title: data.course.title, description: data.course.description || "" });
         }
       } finally {
         setIsLoading(false);
@@ -99,10 +103,7 @@ export default function Page() {
       });
       if (!error) {
         setCourse(data.course);
-        form.reset({
-          title: data.course.title,
-          description: data.course.description || "",
-        });
+        form.reset({ title: data.course.title, description: data.course.description || "" });
       }
     } finally {
       setIsSaving(false);
@@ -128,7 +129,7 @@ export default function Page() {
                   <BreadcrumbLink href="/teacher">
                     <span className="flex items-center">
                       <NotebookPen size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
-                      <span className="text-muted-foreground">Teacher view</span>
+                      <span className="text-muted-foreground">Teacher View</span>
                     </span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -144,79 +145,62 @@ export default function Page() {
       <main>
         <Container className="py-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold flex items-center">
-              Course editor
-            </h1>
-            <div className="flex items-center">
-              <Button 
-                size="sm" 
-                className="hover:cursor-pointer"
-                onClick={form.handleSubmit(handleSave)}
-                disabled={isSaving || !form.formState.isDirty}
-              >
-                {isSaving ? (
-                  <>
-                    <LoaderCircle className="animate-spin h-4 w-4" />
-                    Saving changes
-                  </>
-                ) : (
-                  <>
-                    <ArrowDownToLine size={16} aria-hidden="true" />
-                    Save changes
-                  </>
-                )}
-              </Button>
-            </div>
+            <h1 className="text-2xl font-bold">Course editor</h1>
+            <Button 
+              size="lg" 
+              className="hover:cursor-pointer"
+              onClick={form.handleSubmit(handleSave)}
+              disabled={isSaving || !form.formState.isDirty}
+            >
+              {isSaving ? (
+                <>
+                  <LoaderCircle className="animate-spin h-4 w-4" />
+                  Saving changes
+                </>
+              ) : (
+                <>
+                  <ArrowDownToLine size={16} aria-hidden="true" />
+                  Save changes
+                </>
+              )}
+            </Button>
           </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  Edit basic information that students will see when browsing courses.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Form {...form}>
-                  <form className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Course title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter course title" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Course description</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Enter course description" 
-                              className="min-h-[200px]"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>Edit basic information that students will see</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form className="space-y-6">
+                  <FormField control={form.control} name="title" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course title</FormLabel>
+                      <FormControl><Input placeholder="Enter course title" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="description" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course description</FormLabel>
+                      <FormControl><Textarea placeholder="Enter course description" className="min-h-[200px]" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
         </Container>
       </main>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create a new section</DialogTitle>
+            <DialogDescription>Fill in the details below to create your new section</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

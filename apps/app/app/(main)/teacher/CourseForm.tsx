@@ -36,7 +36,6 @@ interface CourseFormProps {
 }
 
 export function CourseForm({ onSubmit, onCancel }: CourseFormProps) {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
