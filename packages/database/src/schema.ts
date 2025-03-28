@@ -71,7 +71,7 @@ export const courses = pgTable("courses", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 });
 
-export const sections = pgTable("sections", {
+export const artworks = pgTable("artworks", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -79,7 +79,7 @@ export const sections = pgTable("sections", {
   coverImage: text("cover_image").notNull(),
   extraImages: text("extra_images").notNull().array().default(sql`ARRAY[]::text[]`),
   periodTags: text("period_tags").notNull().array().default(sql`ARRAY[]::text[]`),
-  mediumTags: text("medium_tags").notNull().array().default(sql`ARRAY[]::text[]`),
+  typeTags: text("type_tags").notNull().array().default(sql`ARRAY[]::text[]`),
   link: text("link"),
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -93,5 +93,5 @@ export const schema = {
   accounts: accounts,
   verifications: verifications,
   courses: courses,
-  sections: sections,
+  artworks: artworks,
 };

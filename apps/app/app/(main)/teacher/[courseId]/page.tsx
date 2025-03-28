@@ -191,16 +191,26 @@ export default function Page() {
               </Form>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Sections</CardTitle>
+              <CardDescription>Add and edit sections for your course</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-medium">Sections</h2>
+                  <Button size="sm" variant="outline">
+                    <Plus size={16} aria-hidden="true" />
+                    Add section
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </Container>
       </main>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create a new section</DialogTitle>
-            <DialogDescription>Fill in the details below to create your new section</DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
