@@ -13,6 +13,8 @@ import { toNodeHandler } from "better-auth/node";
 // Routes
 import { userRouter } from './routes/users.route';
 import { courseRouter } from './routes/course.route';
+import { artworkRouter } from './routes/artwork.route';
+
 dotenv.config();
 
 const app = express();
@@ -71,6 +73,7 @@ app.use(
 // Routers
 app.use('/api/user', userRouter);
 app.use('/api/course', courseRouter);
+app.use('/api/artwork', artworkRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

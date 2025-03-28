@@ -28,6 +28,6 @@ export type UserInsert = typeof schema.users.$inferInsert;
 export type Course = typeof schema.courses.$inferSelect;
 export type CourseInsert = typeof schema.courses.$inferInsert;
 
-// Section Types
-export type Section = typeof schema.sections.$inferSelect;
-export type SectionInsert = typeof schema.sections.$inferInsert;
+// Artwork Types
+export type Artwork = typeof schema.artworks.$inferSelect;
+export type ArtworkInsert = typeof schema.artworks.$inferInsert;
