@@ -76,7 +76,7 @@ export const artworks = pgTable("artworks", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   author: text("author").notNull(),
-  coverImage: text("cover_image").notNull(),
+  coverImage: text("cover_image"),
   extraImages: text("extra_images").notNull().array().default(sql`ARRAY[]::text[]`),
   periodTags: text("period_tags").notNull().array().default(sql`ARRAY[]::text[]`),
   typeTags: text("type_tags").notNull().array().default(sql`ARRAY[]::text[]`),

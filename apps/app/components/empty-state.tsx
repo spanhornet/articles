@@ -31,14 +31,14 @@ export default function EmptyState({
   return (
     <button
       onClick={handleClick}
-      className={cn("w-full max-w-md mx-auto text-left bg-transparent border-0 p-0 cursor-pointer", className)}
+      className={cn("w-full text-left bg-transparent border-0 p-0 cursor-pointer", className)}
     >
       <div className={cn(
-        "bg-card text-card-foreground flex flex-col items-center justify-center rounded-xl border border-dashed py-12 transition-all hover:border-primary/50 hover:bg-muted/50",
+        "bg-card text-card-foreground flex flex-col items-center justify-center rounded-xl border border-dashed py-12 transition-all hover:border-primary/50 hover:bg-muted/50 w-full",
         cardClassName
       )}>
         <div className={cn(
-          "flex flex-col items-center justify-center px-6 text-center",
+          "flex flex-col items-center justify-center px-6 text-center w-full",
         )}>
           <div className={cn("text-muted-foreground", iconClassName)}>
             {icon}

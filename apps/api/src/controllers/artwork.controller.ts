@@ -60,7 +60,7 @@ export const createArtwork = async (req: Request, res: Response) => {
       title: title || "New Artwork",
       description: description || "",
       author: "Unknown Artist", // Placeholder
-      coverImage: "https://placeholder.com/400x300", // Placeholder
+      coverImage: null,
       extraImages: [], // Empty array as default
       periodTags: [], // Empty array as default
       typeTags: [], // Empty array as default

@@ -48,10 +48,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette } from "lucide-react";
 
 // Drizzle ORM
 import type { Course, Artwork } from "@repo/database";
+
+import EmptyState from "@/components/empty-state";
+import ImageUploader from "@/components/image-uploader";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -168,7 +171,7 @@ export default function Page() {
     
     try {
       const newOrder = artworks.length;
-      console.log('Creating new artwork with order:', newOrder);
+
       
       const { data, error } = await fetchApi<{ artwork: Artwork }>('/api/artwork', {
         method: "POST",
@@ -177,7 +180,7 @@ export default function Page() {
           description: "Add a description for this artwork",
           courseId,
           author: "Unknown Artist",
-          coverImage: "",
+          coverImage: null,
           extraImages: [],
           periodTags: [],
           typeTags: [],
@@ -191,15 +194,15 @@ export default function Page() {
         return;
       }
 
-      console.log('Created artwork:', data.artwork);
-      setArtworks([...artworks, data.artwork]);
+      // Batch the state updates together
+      setArtworks(prevArtworks => [...prevArtworks, data.artwork]);
       setHasArtworkChanges(true);
     } catch (error) {
       console.error('Failed to create artwork:', error);
     }
   };
 
-  const handleArtworkChange = (artworkId: string, field: 'title' | 'description' | 'author' | 'order', value: string | number) => {
+  const handleArtworkChange = (artworkId: string, field: 'title' | 'description' | 'author' | 'order' | 'coverImage' | 'extraImages', value: string | number | string[]) => {
     const updatedArtworks = artworks.map((a) =>
       a.id === artworkId ? { ...a, [field]: value } : a
     );
@@ -266,7 +269,7 @@ export default function Page() {
       <main>
         <Container className="py-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Course editor</h1>
+            <h1 className="text-2xl">Course Editor</h1>
             <Button 
               size="lg" 
               className="hover:cursor-pointer"
@@ -287,7 +290,7 @@ export default function Page() {
             </Button>
           </div>
           <div className="grid gap-y-6">
-            <Card className="mb-6">
+            <Card className="">
               <CardHeader>
                 <div>
                   <CardTitle>Basic Information</CardTitle>
@@ -319,7 +322,7 @@ export default function Page() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Artworks</CardTitle>
-                  <CardDescription className="mt-2">Add and edit artworks for your course</CardDescription>
+                  <CardDescription className="mt-2">Create and edit artworks for your course</CardDescription>
                 </div>
                 <Button 
                   size="lg" 
@@ -328,20 +331,25 @@ export default function Page() {
                   onClick={handleAddArtwork}
                 >  
                   <Plus size={16} aria-hidden="true" />
-                  Add artwork 
+                  Create artwork 
                 </Button>
               </CardHeader>
               <CardContent>
                 {artworks.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No artworks added yet. Click the button above to add one.</p>
+                  <EmptyState
+                    title="No artworks yet"
+                    description="Start building your course by creating an artwork."
+                    className="w-full"
+                    icon={<Palette className="h-8 w-8" />}
+                    onClick={handleAddArtwork}
+                  />
                 ) : (
                   <div className="space-y-4">
                     {artworks.map((artwork) => (
                       <div key={artwork.id} className="p-4 border rounded-lg space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">{artwork.order + 1}</span>
-                            <span className="font-medium">{artwork.title}</span>
+                            <span className="font-medium">{artwork.title || "Untitled Artwork"}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Button
@@ -364,42 +372,65 @@ export default function Page() {
                             </Button>
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <label htmlFor={`title-${artwork.id}`} className="text-sm font-medium">
-                            Title
-                          </label>
-                          <Input
-                            id={`title-${artwork.id}`}
-                            value={artwork.title}
-                            onChange={(e) => {
-                              handleArtworkChange(artwork.id, 'title', e.target.value);
-                            }}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor={`author-${artwork.id}`} className="text-sm font-medium">
-                            Author
-                          </label>
-                          <Input
-                            id={`author-${artwork.id}`}
-                            value={artwork.author}
-                            onChange={(e) => {
-                              handleArtworkChange(artwork.id, 'author', e.target.value);
-                            }}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor={`description-${artwork.id}`} className="text-sm font-medium">
-                            Description
-                          </label>
-                          <Textarea
-                            id={`description-${artwork.id}`}
-                            value={artwork.description}
-                            onChange={(e) => {
-                              handleArtworkChange(artwork.id, 'description', e.target.value);
-                            }}
-                            className="min-h-[100px]"
-                          />
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <label htmlFor={`title-${artwork.id}`} className="text-sm font-medium block">
+                              Title
+                            </label>
+                            <Input
+                              id={`title-${artwork.id}`}
+                              value={artwork.title}
+                              onChange={(e) => {
+                                handleArtworkChange(artwork.id, 'title', e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor={`author-${artwork.id}`} className="text-sm font-medium block">
+                              Author
+                            </label>
+                            <Input
+                              id={`author-${artwork.id}`}
+                              value={artwork.author}
+                              onChange={(e) => {
+                                handleArtworkChange(artwork.id, 'author', e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor={`description-${artwork.id}`} className="text-sm font-medium block">
+                              Description
+                            </label>
+                            <Textarea
+                              id={`description-${artwork.id}`}
+                              value={artwork.description}
+                              onChange={(e) => {
+                                handleArtworkChange(artwork.id, 'description', e.target.value);
+                              }}
+                              className="min-h-[100px]"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor={`images-${artwork.id}`} className="text-sm font-medium block">
+                              Images
+                            </label>
+                            <ImageUploader
+                              onImagesChange={(images) => {
+                                const coverImage = images.find(img => img.isCover)?.url || '';
+                                const extraImages = images.filter(img => !img.isCover).map(img => img.url);
+                                handleArtworkChange(artwork.id, 'coverImage', coverImage);
+                                handleArtworkChange(artwork.id, 'extraImages', extraImages);
+                              }}
+                              initialImages={[
+                                ...(artwork.coverImage ? [{ id: 'cover', url: artwork.coverImage, isCover: true }] : []),
+                                ...(artwork.extraImages || []).map((url, index) => ({ 
+                                  id: `extra-${index}`, 
+                                  url, 
+                                  isCover: false 
+                                }))
+                              ]}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}

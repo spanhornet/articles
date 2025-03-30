@@ -61,7 +61,7 @@ export default function Page() {
       <main>
         <Container className="py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Your courses</h1>
+            <h1 className="text-2xl">Your courses</h1>
             <div className="flex items-center">
               <Button 
                 size="lg" 
