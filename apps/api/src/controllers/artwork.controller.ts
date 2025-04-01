@@ -110,7 +110,7 @@ export const createArtwork = async (req: Request, res: Response) => {
 export const updateArtwork = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, order } = req.body;
+    const { title, description, author, order, coverImage, extraImages } = req.body;
 
     // Validate input
     if (!id) {
@@ -162,7 +162,6 @@ export const updateArtwork = async (req: Request, res: Response) => {
       });
     }
 
-    // Prepare update data
     const updateData: any = {
       updatedAt: new Date()
     };
@@ -170,7 +169,10 @@ export const updateArtwork = async (req: Request, res: Response) => {
     // Only include fields that are provided in the request
     if (title) updateData.title = title;
     if (description) updateData.description = description;
+    if (author) updateData.author = author;
     if (order !== undefined) updateData.order = order;
+    if (coverImage !== undefined) updateData.coverImage = coverImage;
+    if (extraImages !== undefined) updateData.extraImages = extraImages;
 
     // Update the artwork in the database
     const [updatedArtwork] = await db.update(schema.artworks)

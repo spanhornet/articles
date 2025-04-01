@@ -54,7 +54,7 @@ import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDow
 import type { Course, Artwork } from "@repo/database";
 
 import EmptyState from "@/components/empty-state";
-import ImageUploader from "@/components/image-uploader";
+import ImageUploader from "@/app/(main)/teacher/[courseId]/image-uploader";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -150,6 +150,8 @@ export default function Page() {
               description: artwork.description,
               author: artwork.author,
               order: artwork.order,
+              coverImage: artwork.coverImage,
+              extraImages: artwork.extraImages,
             }),
           });
           if (updateError) {
@@ -203,11 +205,13 @@ export default function Page() {
   };
 
   const handleArtworkChange = (artworkId: string, field: 'title' | 'description' | 'author' | 'order' | 'coverImage' | 'extraImages', value: string | number | string[]) => {
-    const updatedArtworks = artworks.map((a) =>
-      a.id === artworkId ? { ...a, [field]: value } : a
-    );
-    setArtworks(updatedArtworks);
-    setHasArtworkChanges(true);
+    setArtworks(prevArtworks => {
+      const updatedArtworks = prevArtworks.map((a) =>
+        a.id === artworkId ? { ...a, [field]: value } : a
+      );
+      setHasArtworkChanges(true);
+      return updatedArtworks;
+    });
   };
 
   const handleMoveArtwork = (artworkId: string, direction: 'up' | 'down') => {

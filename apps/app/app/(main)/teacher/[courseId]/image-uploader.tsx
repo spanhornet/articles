@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { ImagePlus, Star, Trash2, X } from "lucide-react";
+import { ImagePlus, Star, Trash2, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import EmptyState from "@/components/empty-state";
+import { fetchApi } from "@/lib/api";
 
 interface ImageUploaderProps {
   onImagesChange?: (images: UploadedImage[]) => void;
@@ -32,18 +33,58 @@ export function ImageUploader({
   className,
 }: ImageUploaderProps) {
   const [images, setImages] = useState<UploadedImage[]>(initialImages);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevImagesRef = useRef<UploadedImage[]>(initialImages);
   
   // Track if we're dragging files over the component
   const [isDragging, setIsDragging] = useState(false);
 
-  // Helper function to update images and notify parent
+  // Add useEffect to handle image changes
+  useEffect(() => {
+    // Only call onImagesChange if the images have actually changed
+    if (JSON.stringify(prevImagesRef.current) !== JSON.stringify(images)) {
+      onImagesChange?.(images);
+      prevImagesRef.current = images;
+    }
+  }, [images, onImagesChange]);
+
+  // Helper function to update images
   const updateImages = (newImages: UploadedImage[]) => {
     setImages(newImages);
-    onImagesChange?.(newImages);
   };
+
+  const uploadFileToR2 = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const { data, error } = await fetchApi<{ imageUrl: string }>('/api/image/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          // Remove Content-Type to let the browser set it with the boundary
+        },
+        showSuccessToast: false,
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      if (!data?.imageUrl) {
+        throw new Error('No image URL returned from server');
+      }
+      
+      return data.imageUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Error uploading image');
+      throw error;
+    }
+  };  
   
-  const handleImageUpload = (files: FileList | null) => {
+  const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
     const remainingSlots = maxImages - images.length;
@@ -64,32 +105,40 @@ export function ImageUploader({
       });
     }
     
+    setIsUploading(true);
+    
     // Process each file
-    filesToProcess.forEach(file => {
+    for (const file of filesToProcess) {
       // Check file type
       if (!file.type.startsWith('image/')) {
         toast.error("Invalid file type", {
           description: "Only image files are allowed"
         });
-        return;
+        continue;
       }
       
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && typeof event.target.result === 'string') {
-          const newImage: UploadedImage = {
-            id: crypto.randomUUID(),
-            url: event.target.result,
-            isCover: images.length === 0 && initialImages.length === 0, // First image is cover by default
-            file
-          };
-          
-          updateImages([...images, newImage]);
-        }
-      };
-      
-      reader.readAsDataURL(file);
-    });
+      try {
+        // Upload to R2 and get the URL
+        const imageUrl = await uploadFileToR2(file);
+        
+        // Add the image to our state
+        const newImage: UploadedImage = {
+          id: crypto.randomUUID(),
+          url: imageUrl,
+          isCover: images.length === 0 && initialImages.length === 0, // First image is cover by default
+        };
+        
+        setImages(prevImages => {
+          const updatedImages = [...prevImages, newImage];
+          return updatedImages;
+        });
+        
+      } catch (error) {
+        console.error('Error processing image:', error);
+      }
+    }
+    
+    setIsUploading(false);
     
     // Reset the file input
     if (fileInputRef.current) {
@@ -110,11 +159,15 @@ export function ImageUploader({
     toast.success("Cover image updated");
   };
   
-  const handleDelete = (id: string) => {
-    // Check if we're deleting the cover image
-    const isDeletedImageCover = images.find(img => img.id === id)?.isCover || false;
+  const handleDelete = async (id: string) => {
+    // Find the image
+    const imageToDelete = images.find(img => img.id === id);
+    if (!imageToDelete) return;
     
-    // Remove the image
+    // Check if we're deleting the cover image
+    const isDeletedImageCover = imageToDelete.isCover;
+    
+    // Remove the image from local state
     const updatedImages = images.filter(img => img.id !== id);
     
     // If we deleted the cover and we have other images, set the first one as cover
@@ -122,9 +175,25 @@ export function ImageUploader({
       updatedImages[0].isCover = true;
     }
     
+    // Update the state
     updateImages(updatedImages);
-    toast.success("Image removed");
-  };
+    
+    try {
+      // Delete from R2 if we have a URL (not a local file)
+      if (imageToDelete.url && !imageToDelete.url.startsWith('data:')) {
+        await fetchApi('/api/image/delete', {
+          method: 'POST',
+          body: JSON.stringify({ imageUrl: imageToDelete.url }),
+          showSuccessToast: false,
+        });
+      }
+      
+      toast.success("Image removed");
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Error removing image');
+    }
+  };  
   
   // Handle drag events for drag & drop functionality
   const handleDragEnter = (e: React.DragEvent) => {
@@ -229,8 +298,14 @@ export function ImageUploader({
                     <AspectRatio ratio={1}>
                       <div className="h-full border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors">
                         <div className="flex flex-col items-center gap-1 p-4 text-center">
-                          <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                          <span className="text-sm font-medium">Add Image</span>
+                          {isUploading ? (
+                            <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
+                          ) : (
+                            <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                          )}
+                          <span className="text-sm font-medium">
+                            {isUploading ? "Uploading..." : "Add Image"}
+                          </span>
                           <span className="text-xs text-muted-foreground">
                             {maxImages - images.length} image{maxImages - images.length !== 1 ? 's' : ''} remaining
                           </span>
@@ -252,7 +327,7 @@ export function ImageUploader({
         multiple
         className="hidden"
         onChange={handleFileInputChange}
-        disabled={images.length >= maxImages}
+        disabled={images.length >= maxImages || isUploading}
       />
     </div>
   );
