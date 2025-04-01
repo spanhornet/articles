@@ -7,7 +7,7 @@ interface RateLimitInfo {
   resetTime: number;
 }
 
-const RATE_LIMIT = 5; // Maximum number of calls allowed
+const RATE_LIMIT = 10; // Maximum number of calls allowed
 const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // In-memory store for rate limiting

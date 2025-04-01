@@ -80,6 +80,7 @@ export const artworks = pgTable("artworks", {
   extraImages: text("extra_images").notNull().array().default(sql`ARRAY[]::text[]`),
   periodTags: text("period_tags").notNull().array().default(sql`ARRAY[]::text[]`),
   typeTags: text("type_tags").notNull().array().default(sql`ARRAY[]::text[]`),
+  collocation: text("collocation"),
   link: text("link"),
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),

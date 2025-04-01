@@ -280,40 +280,57 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
       });
     }
 
-    // Get all courses for the user with their artworks count
+    // Get all courses for the user
     const courses = await db.select({
       id: schema.courses.id,
       title: schema.courses.title,
       description: schema.courses.description,
       createdAt: schema.courses.createdAt,
       updatedAt: schema.courses.updatedAt,
-      coverImage: schema.artworks.coverImage,
-      artworksCount: sql<number>`(
-        SELECT COUNT(*)::int 
-        FROM ${schema.artworks} 
-        WHERE ${schema.artworks.courseId} = ${schema.courses.id}
-      )`
     })
     .from(schema.courses)
-    .leftJoin(
-      schema.artworks,
-      and(
-        eq(schema.artworks.courseId, schema.courses.id),
-        sql`${schema.artworks.id} = (
-          SELECT id FROM ${schema.artworks}
-          WHERE ${schema.artworks.courseId} = ${schema.courses.id}
-          ORDER BY ${schema.artworks.createdAt} ASC
-          LIMIT 1
-        )`
-      )
-    )
     .where(eq(schema.courses.userId, session.user.id))
     .orderBy(desc(schema.courses.createdAt));
+
+    // If there are no courses, return early with empty array
+    if (courses.length === 0) {
+      return res.status(200).json({
+        title: "Courses Found",
+        message: "No courses found",
+        courses: []
+      });
+    }
+
+    // Get artworks for each course
+    const coursesWithArtworks = await Promise.all(
+      courses.map(async (course) => {
+        // Get artworks for this specific course
+        const artworks = await db.select({
+          id: schema.artworks.id,
+          title: schema.artworks.title,
+          description: schema.artworks.description,
+          coverImage: schema.artworks.coverImage,
+          createdAt: schema.artworks.createdAt,
+          updatedAt: schema.artworks.updatedAt,
+          courseId: schema.artworks.courseId
+        })
+        .from(schema.artworks)
+        .where(eq(schema.artworks.courseId, course.id))
+        .orderBy(schema.artworks.createdAt);
+
+        // Return course with its artworks
+        return {
+          ...course,
+          artworksCount: artworks.length,
+          artworks
+        };
+      })
+    );
 
     return res.status(200).json({
       title: "Courses Found",
       message: "Courses retrieved successfully",
-      courses
+      courses: coursesWithArtworks
     });
 
   } catch (error: any) {

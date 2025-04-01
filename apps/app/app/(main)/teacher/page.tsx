@@ -29,6 +29,15 @@ import {
 import { CourseForm } from "./CourseForm";
 import { TeacherCourseCard } from "./TeacherCourseCard";
 
+interface Artwork {
+  id: string;
+  title: string;
+  description: string;
+  coverImage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -37,6 +46,7 @@ interface Course {
   updatedAt: string;
   coverImage: string | null;
   artworksCount: number;
+  artworks: Artwork[];
 }
 
 export default function Page() {
@@ -63,9 +73,16 @@ export default function Page() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const { data, error } = await fetchApi("/api/course");
+        const { data, error } = await fetchApi("/api/course", {
+          method: "GET",
+          showSuccessToast: false,
+        });
+        console.log("API Response:", { data, error });
         if (!error && data.courses) {
+          console.log("Courses data:", data.courses);
           setCourses(data.courses);
+        } else {
+          console.log("Error or no courses:", { error, courses: data.courses });
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -89,34 +106,33 @@ export default function Page() {
           </div>
         </Container>
       </header>
-      <main>
+      <main className="min-h-screen bg-background">
         <Container className="py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl">Courses</h1>
-            <div className="flex items-center">
-              <Button 
-                size="lg" 
-                className="hover:cursor-pointer"
-                onClick={onOpen}
-              >
-                <Plus size={16} aria-hidden="true" />
-                Create course
-              </Button>
-            </div>
+            <Button 
+              size="lg" 
+              className="hover:cursor-pointer"
+              onClick={onOpen}
+            >
+              <Plus size={16} aria-hidden="true" />
+              Create course
+            </Button>
           </div>
           
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-[400px] bg-muted animate-pulse rounded-lg" />
+                <div key={i} className="aspect-[4/3] bg-muted animate-pulse rounded-lg" />
               ))}
             </div>
           ) : courses.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No courses found. Create your first course to get started!</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground mb-2">No courses found.</p>
+              <p className="text-sm text-muted-foreground">Create your first course to get started.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {courses.map((course) => (
                 <TeacherCourseCard key={course.id} course={course} />
               ))}
