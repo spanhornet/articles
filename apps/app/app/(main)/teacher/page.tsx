@@ -3,6 +3,7 @@
 // React Hooks
 import { useDialog } from "@/hooks/useDialog";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // Shadcn UI
 import { Container } from "@/components/container";
@@ -26,9 +27,22 @@ import {
 
 // Components
 import { CourseForm } from "./CourseForm";
+import { TeacherCourseCard } from "./TeacherCourseCard";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  coverImage: string | null;
+  artworksCount: number;
+}
 
 export default function Page() {
   const router = useRouter();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { isOpen, onOpen, onClose } = useDialog();
   
@@ -46,8 +60,25 @@ export default function Page() {
     }
   };
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const { data, error } = await fetchApi("/api/course");
+        if (!error && data.courses) {
+          setCourses(data.courses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   return (
-    <>
+    <> 
       <header className="border-b">
         <Container className="py-4">
           <div className="flex items-center justify-between">
@@ -60,8 +91,8 @@ export default function Page() {
       </header>
       <main>
         <Container className="py-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl">Your courses</h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl">Courses</h1>
             <div className="flex items-center">
               <Button 
                 size="lg" 
@@ -73,6 +104,24 @@ export default function Page() {
               </Button>
             </div>
           </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-[400px] bg-muted animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No courses found. Create your first course to get started!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <TeacherCourseCard key={course.id} course={course} />
+              ))}
+            </div>
+          )}
         </Container>
       </main>
       <Dialog open={isOpen} onOpenChange={onClose}>

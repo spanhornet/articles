@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 // Drizzle ORM
 import { db, schema } from "@repo/database";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 // Better-Auth
 import { auth } from "../auth";
@@ -259,6 +259,79 @@ export const updateCourse = async (req: Request, res: Response) => {
     return res.status(500).json({
       title: "Server Error",
       message: "An error occurred while updating the course",
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
+    });
+  }
+};
+
+export const getAllCoursesByUserId = async (req: Request, res: Response) => {
+  try {
+    // Get the authenticated user session
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    // If no session, return unauthorized
+    if (!session || !session.user) {
+      return res.status(401).json({
+        title: "Authentication Required",
+        message: "You must be logged in to view courses",
+        details: { reason: "no_session" }
+      });
+    }
+
+    // Get all courses for the user with their artworks count
+    const courses = await db.select({
+      id: schema.courses.id,
+      title: schema.courses.title,
+      description: schema.courses.description,
+      createdAt: schema.courses.createdAt,
+      updatedAt: schema.courses.updatedAt,
+      coverImage: schema.artworks.coverImage,
+      artworksCount: sql<number>`(
+        SELECT COUNT(*)::int 
+        FROM ${schema.artworks} 
+        WHERE ${schema.artworks.courseId} = ${schema.courses.id}
+      )`
+    })
+    .from(schema.courses)
+    .leftJoin(
+      schema.artworks,
+      and(
+        eq(schema.artworks.courseId, schema.courses.id),
+        sql`${schema.artworks.id} = (
+          SELECT id FROM ${schema.artworks}
+          WHERE ${schema.artworks.courseId} = ${schema.courses.id}
+          ORDER BY ${schema.artworks.createdAt} ASC
+          LIMIT 1
+        )`
+      )
+    )
+    .where(eq(schema.courses.userId, session.user.id))
+    .orderBy(desc(schema.courses.createdAt));
+
+    return res.status(200).json({
+      title: "Courses Found",
+      message: "Courses retrieved successfully",
+      courses
+    });
+
+  } catch (error: any) {
+    console.error("Get courses error:", error);
+    
+    // Handle specific errors from Better-Auth
+    if (error instanceof APIError) {
+      return res.status(error.statusCode).json({
+        title: "Authentication Error",
+        message: error.message || "Failed to get courses",
+        details: { errorCode: error.statusCode, errorType: error.status }
+      });
+    }
+
+    // Generic error handler
+    return res.status(500).json({
+      title: "Server Error",
+      message: "An error occurred while retrieving the courses",
       details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
     });
   }
