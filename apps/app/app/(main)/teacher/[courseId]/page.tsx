@@ -54,7 +54,7 @@ import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDow
 import type { Course, Artwork } from "@repo/database";
 
 import EmptyState from "@/components/empty-state";
-import ImageUploader from "@/app/(main)/teacher/[courseId]/image-uploader";
+import ImageUploader from "@/app/(main)/teacher/[courseId]/ImageUploader";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),

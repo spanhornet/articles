@@ -9,6 +9,7 @@ import { Palette, Calendar, Clock, ImageIcon, ArrowRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+
 interface Artwork {
   id: string;
   title: string;
@@ -27,6 +28,7 @@ interface TeacherCourseCardProps {
     updatedAt: string
     artworksCount: number
     artworks: Artwork[]
+    isPublished: boolean
   }
 }
 
@@ -37,6 +39,7 @@ export function TeacherCourseCard({ course }: TeacherCourseCardProps) {
   const router = useRouter()
   useEffect(() => {
     setIsLoading(true)
+    console.log("COURSE", course)
     if (course.artworks && course.artworks.length > 0) {
       // Find the first artwork with a valid coverImage
       const artworkWithCover = course.artworks.find(artwork => 

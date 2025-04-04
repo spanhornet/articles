@@ -274,10 +274,10 @@ export function ImageUploader({
                         <Button
                           variant="secondary"
                           size="icon"
-                          className="h-8 w-8 hover:cursor-pointer"
+                          className="h-8 w-8 hover:cursor-pointer text-destructive"
                           onClick={() => handleDelete(image.id)}
                         >
-                          <X className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Delete image</span>
                         </Button>
                       </div>

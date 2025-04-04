@@ -45,6 +45,7 @@ interface Course {
   createdAt: string;
   updatedAt: string;
   coverImage: string | null;
+  isPublished: boolean;
   artworksCount: number;
   artworks: Artwork[];
 }
@@ -77,12 +78,8 @@ export default function Page() {
           method: "GET",
           showSuccessToast: false,
         });
-        console.log("API Response:", { data, error });
         if (!error && data.courses) {
-          console.log("Courses data:", data.courses);
           setCourses(data.courses);
-        } else {
-          console.log("Error or no courses:", { error, courses: data.courses });
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -107,7 +104,7 @@ export default function Page() {
         </Container>
       </header>
       <main className="min-h-screen bg-background">
-        <Container className="py-6">
+        <Container className="min-h-screen py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl">Courses</h1>
             <Button 
@@ -119,7 +116,6 @@ export default function Page() {
               Create course
             </Button>
           </div>
-          
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {[1, 2, 3].map((i) => (

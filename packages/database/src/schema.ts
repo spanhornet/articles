@@ -67,7 +67,7 @@ export const courses = pgTable("courses", {
   description: text("description").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  publishedAt: timestamp("published_at"),
+  isPublished: boolean("is_published").notNull().default(false),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 });
 

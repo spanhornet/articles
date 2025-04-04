@@ -287,6 +287,7 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
       description: schema.courses.description,
       createdAt: schema.courses.createdAt,
       updatedAt: schema.courses.updatedAt,
+      isPublished: schema.courses.isPublished
     })
     .from(schema.courses)
     .where(eq(schema.courses.userId, session.user.id))
