@@ -48,7 +48,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2 } from "lucide-react";
 
 // Drizzle ORM
 import type { Course, Artwork } from "@repo/database";
@@ -71,6 +71,7 @@ export default function Page() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasArtworkChanges, setHasArtworkChanges] = useState(false);
   const { isOpen, onOpen, onClose } = useDialog();
+  const [artworkToDelete, setArtworkToDelete] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -238,6 +239,25 @@ export default function Page() {
     setHasArtworkChanges(true);
   };
 
+  const handleDeleteArtwork = async (artworkId: string) => {
+    try {
+      const { error } = await fetchApi(`/api/artwork/${artworkId}`, {
+        method: "DELETE",
+      });
+
+      if (error) {
+        console.error('Error deleting artwork:', error);
+        return;
+      }
+
+      setArtworks(prevArtworks => prevArtworks.filter(a => a.id !== artworkId));
+      setHasArtworkChanges(true);
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete artwork:', error);
+    }
+  };
+
   if (isLoading || !course) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -359,6 +379,17 @@ export default function Page() {
                             <Button
                               variant="outline"
                               size="icon"
+                              className="h-8 w-8 hover:cursor-pointer text-destructive hover:text-destructive"
+                              onClick={() => {
+                                setArtworkToDelete(artwork.id);
+                                onOpen();
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
                               className="h-8 w-8 hover:cursor-pointer"
                               onClick={() => handleMoveArtwork(artwork.id, 'up')}
                               disabled={artwork.order === 0}
@@ -445,6 +476,30 @@ export default function Page() {
           </div>
         </Container>
       </main>
+      <Dialog open={isOpen && artworkToDelete !== null} onOpenChange={() => {
+        onClose();
+        setArtworkToDelete(null);
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Artwork</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this artwork? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" className="hover:cursor-pointer" onClick={() => {
+              onClose();
+              setArtworkToDelete(null);
+            }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" className="hover:cursor-pointer" onClick={() => artworkToDelete && handleDeleteArtwork(artworkToDelete)}>
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

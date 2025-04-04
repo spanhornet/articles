@@ -291,3 +291,80 @@ export const getArtworksByCourse = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteArtwork = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate input
+    if (!id) {
+      return res.status(400).json({
+        title: "Invalid Input",
+        message: "Artwork ID is required",
+        details: { missingFields: ["id"] }
+      });
+    }
+
+    // Get the authenticated user session
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    // If no session, return unauthorized
+    if (!session || !session.user) {
+      return res.status(401).json({
+        title: "Authentication Required",
+        message: "You must be logged in to delete an artwork",
+        details: { reason: "no_session" }
+      });
+    }
+
+    // First check if the artwork exists and belongs to the user's course
+    const [existingArtwork] = await db.select()
+      .from(schema.artworks)
+      .innerJoin(schema.courses, eq(schema.artworks.courseId, schema.courses.id))
+      .where(and(
+        eq(schema.artworks.id, id),
+        eq(schema.courses.userId, session.user.id)
+      ))
+      .limit(1);
+
+    // If artwork not found or doesn't belong to user's course
+    if (!existingArtwork) {
+      return res.status(404).json({
+        title: "Not Found",
+        message: "Artwork not found or you don't have permission to delete it",
+        details: { artworkId: id }
+      });
+    }
+
+    // Delete the artwork
+    await db.delete(schema.artworks)
+      .where(eq(schema.artworks.id, id));
+
+    return res.status(200).json({
+      title: "Artwork Deleted",
+      message: "Artwork has been deleted successfully",
+      artworkId: id
+    });
+
+  } catch (error: any) {
+    console.error("Delete artwork error:", error);
+    
+    // Handle specific errors from Better-Auth
+    if (error instanceof APIError) {
+      return res.status(error.statusCode).json({
+        title: "Authentication Error",
+        message: error.message || "Failed to delete artwork",
+        details: { errorCode: error.statusCode, errorType: error.status }
+      });
+    }
+
+    // Generic error handler
+    return res.status(500).json({
+      title: "Server Error",
+      message: "An error occurred while deleting the artwork",
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
+    });
+  }
+};
