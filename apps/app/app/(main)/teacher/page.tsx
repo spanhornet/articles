@@ -71,6 +71,10 @@ export default function Page() {
 
   const { isOpen, onOpen, onClose } = useDialog();
   
+  const handleCourseDelete = (courseId: string) => {
+    setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+  };
+
   const onSubmit = async (values: { title: string; description: string }) => {
     const { data, error} = await fetchApi("/api/course", {
       method: "POST",
@@ -161,7 +165,11 @@ export default function Page() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {courses.map((course) => (
-                <TeacherCourseCard key={course.id} course={course} />
+                <TeacherCourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onDelete={handleCourseDelete}
+                />
               ))}
             </div>
           )}

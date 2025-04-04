@@ -354,3 +354,81 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteCourse = async (req: Request, res: Response) => {
+  try {
+    const { courseId } = req.params;
+
+    // Validate input
+    if (!courseId) {
+      return res.status(400).json({
+        title: "Invalid Input",
+        message: "Course ID is required",
+        details: { missingFields: ["courseId"] }
+      });
+    }
+
+    // Get the authenticated user session
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    // If no session, return unauthorized
+    if (!session || !session.user) {
+      return res.status(401).json({
+        title: "Authentication Required",
+        message: "You must be logged in to delete a course",
+        details: { reason: "no_session" }
+      });
+    }
+
+    // First check if the course exists and belongs to the user
+    const [existingCourse] = await db.select().from(schema.courses)
+      .where(and(
+        eq(schema.courses.id, courseId),
+        eq(schema.courses.userId, session.user.id)
+      ))
+      .limit(1);
+
+    // If course not found or doesn't belong to user
+    if (!existingCourse) {
+      return res.status(404).json({
+        title: "Not Found",
+        message: "Course not found or you don't have permission to delete it",
+        details: { courseId: courseId }
+      });
+    }
+
+    // Delete the course
+    await db.delete(schema.courses)
+      .where(and(
+        eq(schema.courses.id, courseId),
+        eq(schema.courses.userId, session.user.id)
+      ));
+
+    return res.status(200).json({
+      title: "Course Deleted",
+      message: "Course has been deleted successfully",
+      courseId
+    });
+
+  } catch (error: any) {
+    console.error("Delete course error:", error);
+    
+    // Handle specific errors from Better-Auth
+    if (error instanceof APIError) {
+      return res.status(error.statusCode).json({
+        title: "Authentication Error",
+        message: error.message || "Failed to delete course",
+        details: { errorCode: error.statusCode, errorType: error.status }
+      });
+    }
+
+    // Generic error handler
+    return res.status(500).json({
+      title: "Server Error",
+      message: "An error occurred while deleting the course",
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
+    });
+  }
+};

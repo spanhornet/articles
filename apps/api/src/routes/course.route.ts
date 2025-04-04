@@ -6,7 +6,8 @@ import {
   createCourse,
   getCourseById,
   updateCourse,
-  getAllCoursesByUserId
+  getAllCoursesByUserId,
+  deleteCourse
 } from "../controllers/course.controller";
 
 // Router
@@ -28,5 +29,8 @@ router.post("/", asyncHandler(createCourse));
 
 // Update a course
 router.put("/:courseId", asyncHandler(updateCourse));
+
+// Delete a course
+router.delete("/:courseId", asyncHandler(deleteCourse));
 
 export { router as courseRouter };
