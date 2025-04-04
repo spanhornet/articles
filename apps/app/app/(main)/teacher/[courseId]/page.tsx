@@ -3,6 +3,11 @@
 // Utilities
 import { fetchApi } from "@/lib/api";
 
+// Helper functions
+const truncateText = (text: string, limit: number) => {
+  return text.length > limit ? `${text.substring(0, limit)}...` : text;
+};
+
 // Next.js Hooks
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -48,7 +53,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2 } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2, Notebook } from "lucide-react";
 
 // Drizzle ORM
 import type { Course, Artwork } from "@repo/database";
@@ -72,11 +77,36 @@ export default function Page() {
   const [hasArtworkChanges, setHasArtworkChanges] = useState(false);
   const { isOpen, onOpen, onClose } = useDialog();
   const [artworkToDelete, setArtworkToDelete] = useState<string | null>(null);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { title: "", description: "" },
   });
+
+  const hasUnsavedChanges = form.formState.isDirty || hasArtworkChanges;
+
+  const handleNavigation = (path: string) => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(path);
+      setShowUnsavedDialog(true);
+    } else {
+      window.location.href = path;
+    }
+  };
+
+  const handleSaveAndNavigate = async () => {
+    if (!pendingNavigation) return;
+    
+    await handleSave(form.getValues());
+    window.location.href = pendingNavigation;
+  };
+
+  const handleDiscardAndNavigate = () => {
+    if (!pendingNavigation) return;
+    window.location.href = pendingNavigation;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -274,7 +304,16 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/teacher">
+                  <BreadcrumbLink onClick={() => handleNavigation('/')} className="cursor-pointer">
+                    <span className="flex items-center">
+                      <Notebook size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
+                      <span className="text-muted-foreground">Student View</span>
+                    </span>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink onClick={() => handleNavigation('/teacher')} className="cursor-pointer">
                     <span className="flex items-center">
                       <NotebookPen size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
                       <span className="text-muted-foreground">Teacher View</span>
@@ -283,7 +322,7 @@ export default function Page() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{course.title}</BreadcrumbPage>
+                  <BreadcrumbPage>{truncateText(course.title, 15)}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -496,6 +535,38 @@ export default function Page() {
             </Button>
             <Button variant="destructive" className="hover:cursor-pointer" onClick={() => artworkToDelete && handleDeleteArtwork(artworkToDelete)}>
               Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unsaved Changes</DialogTitle>
+            <DialogDescription>
+              You have unsaved changes. Would you like to save them before leaving?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" className="hover:cursor-pointer" onClick={() => {
+              setShowUnsavedDialog(false);
+              setPendingNavigation(null);
+            }}>
+              Cancel
+            </Button>
+            <Button variant="secondary" className="hover:cursor-pointer" onClick={handleDiscardAndNavigate}>
+              Discard changes
+            </Button>
+            <Button className="hover:cursor-pointer" onClick={handleSaveAndNavigate} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <LoaderCircle className="animate-spin h-4 w-4 mr-2" />
+                  Saving...
+                </>
+              ) : (
+                'Save and leave'
+              )}
             </Button>
           </div>
         </DialogContent>

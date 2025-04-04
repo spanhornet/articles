@@ -15,17 +15,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // API
 import { fetchApi } from "@/lib/api";
 
+// Helper functions
+const truncateText = (text: string, limit: number) => {
+  return text.length > limit ? `${text.substring(0, limit)}...` : text;
+};
+
 // Lucide Icons
 import { 
+  Notebook,
   NotebookPen,
   Plus
 } from "lucide-react";
 
-// Components
+// Components 
 import { CourseForm } from "./CourseForm";
 import { TeacherCourseCard } from "./TeacherCourseCard";
 
@@ -96,10 +110,27 @@ export default function Page() {
       <header className="border-b">
         <Container className="py-4">
           <div className="flex items-center justify-between">
-            <span className="flex items-center text-sm">
-              <NotebookPen size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
-              <span className="text-muted-foreground">Teacher View</span>
-            </span>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/" className="cursor-pointer">
+                    <span className="flex items-center">
+                      <Notebook size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
+                      <span className="text-muted-foreground">Student View</span>
+                    </span>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>
+                    <span className="flex items-center">
+                      <NotebookPen size={16} className="mr-2" aria-hidden="true" />
+                      <span>Teacher View</span>
+                    </span>
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
         </Container>
       </header>
