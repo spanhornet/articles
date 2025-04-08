@@ -60,6 +60,7 @@ import type { Course, Artwork } from "@repo/database";
 
 import EmptyState from "@/components/empty-state";
 import ImageUploader from "@/app/(main)/teacher/[courseId]/ImageUploader";
+import { ArtworkForm } from "./ArtworkForm";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -80,6 +81,9 @@ export default function Page() {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [showCreateArtworkDialog, setShowCreateArtworkDialog] = useState(false);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [artworksToDelete, setArtworksToDelete] = useState<string[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -171,6 +175,17 @@ export default function Page() {
         return;
       }
 
+      // Delete artworks that are marked for deletion
+      for (const idToDelete of artworksToDelete) {
+        const { error: deleteError } = await fetchApi(`/api/artwork/${idToDelete}`, {
+          method: "DELETE",
+        });
+        if (deleteError) {
+          console.error('Error deleting artwork:', deleteError);
+          return;
+        }
+      }
+
       // Save artwork changes
       if (hasArtworkChanges) {
         // Handle updated artworks
@@ -195,25 +210,29 @@ export default function Page() {
       setCourse(courseData.course);
       form.reset({ title: courseData.course.title, description: courseData.course.description || "" });
       setHasArtworkChanges(false);
+      setArtworksToDelete([]); // Clear the deletion queue after successful save
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleAddArtwork = async () => {
+    setShowCreateArtworkDialog(true);
+  };
+
+  const handleCreateArtwork = async (values: { title: string; description: string; author: string }) => {
     if (!courseId) return;
     
     try {
       const newOrder = artworks.length;
-
       
       const { data, error } = await fetchApi<{ artwork: Artwork }>('/api/artwork', {
         method: "POST",
         body: JSON.stringify({
-          title: "New Artwork",
-          description: "Add a description for this artwork",
+          title: values.title,
+          description: values.description,
           courseId,
-          author: "Unknown Artist",
+          author: values.author,
           coverImage: null,
           extraImages: [],
           periodTags: [],
@@ -228,9 +247,9 @@ export default function Page() {
         return;
       }
 
-      // Batch the state updates together
       setArtworks(prevArtworks => [...prevArtworks, data.artwork]);
       setHasArtworkChanges(true);
+      setShowCreateArtworkDialog(false);
     } catch (error) {
       console.error('Failed to create artwork:', error);
     }
@@ -270,23 +289,12 @@ export default function Page() {
     setHasArtworkChanges(true);
   };
 
-  const handleDeleteArtwork = async (artworkId: string) => {
-    try {
-      const { error } = await fetchApi(`/api/artwork/${artworkId}`, {
-        method: "DELETE",
-      });
-
-      if (error) {
-        console.error('Error deleting artwork:', error);
-        return;
-      }
-
-      setArtworks(prevArtworks => prevArtworks.filter(a => a.id !== artworkId));
-      setHasArtworkChanges(true);
-      onClose();
-    } catch (error) {
-      console.error('Failed to delete artwork:', error);
-    }
+  const handleDeleteArtwork = (artworkId: string) => {
+    setArtworksToDelete(prev => [...prev, artworkId]);
+    setArtworks(prevArtworks => prevArtworks.filter(a => a.id !== artworkId));
+    setHasArtworkChanges(true);
+    setArtworkToDelete(null);
+    onClose();
   };
 
   const handlePublish = async () => {
@@ -303,7 +311,12 @@ export default function Page() {
       }
     } finally {
       setIsPublishing(false);
+      setShowPublishDialog(false);
     }
+  };
+
+  const handlePublishClick = () => {
+    setShowPublishDialog(true);
   };
 
   if (isLoading || !course) {
@@ -356,7 +369,7 @@ export default function Page() {
                 size="lg" 
                 variant={course?.isPublished ? "outline" : "default"}
                 className="hover:cursor-pointer"
-                onClick={handlePublish}
+                onClick={handlePublishClick}
                 disabled={isPublishing}
               >
                 {isPublishing ? (
@@ -605,6 +618,56 @@ export default function Page() {
                 </>
               ) : (
                 'Save and leave'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCreateArtworkDialog} onOpenChange={setShowCreateArtworkDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Artwork</DialogTitle>
+            <DialogDescription>
+              Fill in the details for your new artwork piece.
+            </DialogDescription>
+          </DialogHeader>
+          <ArtworkForm 
+            onSubmit={handleCreateArtwork}
+            onCancel={() => setShowCreateArtworkDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{course?.isPublished ? "Unpublish Course" : "Publish Course"}</DialogTitle>
+            <DialogDescription>
+              {course?.isPublished ? (
+                "Are you sure you want to unpublish this course? All students currently using this course will be kicked out, and only you will be able to see it."
+              ) : (
+                "Are you sure you want to publish this course? Once published, everyone will be able to see and access this course."
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" className="hover:cursor-pointer" onClick={() => setShowPublishDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant={course?.isPublished ? "destructive" : "default"} 
+              className="hover:cursor-pointer" 
+              onClick={handlePublish}
+              disabled={isPublishing}
+            >
+              {isPublishing ? (
+                <>
+                  <LoaderCircle className="animate-spin h-4 w-4" />
+                  {course?.isPublished ? "Unpublishing..." : "Publishing..."}
+                </>
+              ) : (
+                course?.isPublished ? "Unpublish" : "Publish"
               )}
             </Button>
           </div>
