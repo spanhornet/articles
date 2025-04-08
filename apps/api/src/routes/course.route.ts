@@ -7,7 +7,8 @@ import {
   getCourseById,
   updateCourse,
   getAllCoursesByUserId,
-  deleteCourse
+  deleteCourse,
+  updateCoursePublishStatus
 } from "../controllers/course.controller";
 
 // Router
@@ -29,6 +30,9 @@ router.post("/", asyncHandler(createCourse));
 
 // Update a course
 router.put("/:courseId", asyncHandler(updateCourse));
+
+// Update course publish status
+router.put("/:courseId/publish", asyncHandler(updateCoursePublishStatus));
 
 // Delete a course
 router.delete("/:courseId", asyncHandler(deleteCourse));

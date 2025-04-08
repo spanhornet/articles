@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Palette, Calendar, Clock, ImageIcon, ArrowRight, Trash2 } from "lucide-react"
+import { Palette, Calendar, Clock, ImageIcon, ArrowRight, Trash2, Info, Globe } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { fetchApi } from "@/lib/api"
@@ -111,6 +111,21 @@ export function TeacherCourseCard({ course, onDelete }: TeacherCourseCardProps) 
                 <ImageIcon className="h-8 w-8 text-muted-foreground opacity-50" />
               </div>
             )}
+            {course.isPublished ? (
+              <div className="absolute top-2 left-2">
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  Published
+                </Badge>
+              </div>
+            ) : (
+              <div className="absolute top-2 left-2">
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Unpublished
+                </Badge>
+              </div>
+            )}
           </div>
           <CardContent>
             <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
@@ -127,6 +142,13 @@ export function TeacherCourseCard({ course, onDelete }: TeacherCourseCardProps) 
                   disabled={isDeleting}
                 >
                   <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="hover:cursor-pointer"
+                >
+                  <Info className="h-4 w-4" />
                 </Button>
               </div>
               <Button 

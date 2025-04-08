@@ -53,7 +53,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2, Notebook } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2, Notebook, Globe } from "lucide-react";
 
 // Drizzle ORM
 import type { Course, Artwork } from "@repo/database";
@@ -79,6 +79,7 @@ export default function Page() {
   const [artworkToDelete, setArtworkToDelete] = useState<string | null>(null);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -288,6 +289,23 @@ export default function Page() {
     }
   };
 
+  const handlePublish = async () => {
+    if (!courseId) return;
+    setIsPublishing(true);
+    try {
+      const { data, error } = await fetchApi<{ course: Course }>(`/api/course/${courseId}/publish`, {
+        method: "PUT",
+        body: JSON.stringify({ isPublished: !course?.isPublished }),
+      });
+
+      if (!error && data) {
+        setCourse(data.course);
+      }
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   if (isLoading || !course) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -306,7 +324,7 @@ export default function Page() {
                 <BreadcrumbItem>
                   <BreadcrumbLink onClick={() => handleNavigation('/')} className="cursor-pointer">
                     <span className="flex items-center">
-                      <Notebook size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
+                      <Notebook size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
                       <span className="text-muted-foreground">Student View</span>
                     </span>
                   </BreadcrumbLink>
@@ -315,7 +333,7 @@ export default function Page() {
                 <BreadcrumbItem>
                   <BreadcrumbLink onClick={() => handleNavigation('/teacher')} className="cursor-pointer">
                     <span className="flex items-center">
-                      <NotebookPen size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
+                      <NotebookPen size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
                       <span className="text-muted-foreground">Teacher View</span>
                     </span>
                   </BreadcrumbLink>
@@ -333,24 +351,45 @@ export default function Page() {
         <Container className="py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl">Course Editor</h1>
-            <Button 
-              size="lg" 
-              className="hover:cursor-pointer"
-              onClick={form.handleSubmit(handleSave)}
-              disabled={isSaving || (!form.formState.isDirty && !hasArtworkChanges)}
-            >
-              {isSaving ? (
-                <>
-                  <LoaderCircle className="animate-spin h-4 w-4" />
-                  Saving changes
-                </>
-              ) : (
-                <>
-                  <ArrowDownToLine size={16} aria-hidden="true" />
-                  Save changes
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button 
+                size="lg" 
+                variant={course?.isPublished ? "outline" : "default"}
+                className="hover:cursor-pointer"
+                onClick={handlePublish}
+                disabled={isPublishing}
+              >
+                {isPublishing ? (
+                  <>
+                    <LoaderCircle className="animate-spin h-4 w-4" />
+                    {course?.isPublished ? "Unpublishing..." : "Publishing..."}
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4" />
+                    {course?.isPublished ? "Unpublish" : "Publish"}
+                  </>
+                )}
+              </Button>
+              <Button 
+                size="lg" 
+                className="hover:cursor-pointer"
+                onClick={form.handleSubmit(handleSave)}
+                disabled={isSaving || (!form.formState.isDirty && !hasArtworkChanges)}
+              >
+                {isSaving ? (
+                  <>
+                    <LoaderCircle className="animate-spin h-4 w-4" />
+                    Saving changes
+                  </>
+                ) : (
+                  <>
+                    <ArrowDownToLine className="h-4 w-4" />
+                    Save changes
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
           <div className="grid gap-y-6">
             <Card className="">
@@ -561,7 +600,7 @@ export default function Page() {
             <Button className="hover:cursor-pointer" onClick={handleSaveAndNavigate} disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <LoaderCircle className="animate-spin h-4 w-4 mr-2" />
+                  <LoaderCircle className="animate-spin h-4 w-4" />
                   Saving...
                 </>
               ) : (
