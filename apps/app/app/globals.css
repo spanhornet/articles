@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,9 +40,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-publish-unpublished: oklch(0.577 0.245 27.325);
-  --color-publish-outdated: oklch(0.666 0.179 58.318);
-  --color-publish-published: oklch(0.627 0.194 149.214);
 }
 
 :root {
@@ -79,12 +75,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
-  /* Status Colors */
-  --status-draft-bg: oklch(0.96 0.03 89.49);
-  --status-draft-text: oklch(0.55 0.12 89.49);
-  --status-published-bg: oklch(0.95 0.04 142.71);
-  --status-published-text: oklch(0.45 0.13 142.71);
 }
 
 .dark {
@@ -119,12 +109,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-
-  /* Status Colors - Dark Mode */
-  --status-draft-bg: oklch(0.3 0.03 89.49);
-  --status-draft-text: oklch(0.8 0.08 89.49);
-  --status-published-bg: oklch(0.25 0.04 142.71);
-  --status-published-text: oklch(0.8 0.1 142.71);
 }
 
 @layer base {

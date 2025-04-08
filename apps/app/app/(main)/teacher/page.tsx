@@ -117,7 +117,7 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/" className="cursor-pointer">
+                  <BreadcrumbLink href="/student" className="cursor-pointer">
                     <span className="flex items-center">
                       <Notebook size={16} className="text-muted-foreground mr-2" aria-hidden="true" />
                       <span className="text-muted-foreground">Student View</span>

@@ -53,7 +53,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Lucide Icons
-import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2, Notebook, Globe } from "lucide-react";
+import { ArrowDownToLine, LoaderCircle, NotebookPen, Plus, ChevronUp, ChevronDown, Palette, Trash2, Notebook, Globe, Globe2 } from "lucide-react";
 
 // Drizzle ORM
 import type { Course, Artwork } from "@repo/database";
@@ -82,8 +82,6 @@ export default function Page() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showCreateArtworkDialog, setShowCreateArtworkDialog] = useState(false);
-  const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [artworksToDelete, setArtworksToDelete] = useState<string[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -175,17 +173,6 @@ export default function Page() {
         return;
       }
 
-      // Delete artworks that are marked for deletion
-      for (const idToDelete of artworksToDelete) {
-        const { error: deleteError } = await fetchApi(`/api/artwork/${idToDelete}`, {
-          method: "DELETE",
-        });
-        if (deleteError) {
-          console.error('Error deleting artwork:', deleteError);
-          return;
-        }
-      }
-
       // Save artwork changes
       if (hasArtworkChanges) {
         // Handle updated artworks
@@ -199,6 +186,8 @@ export default function Page() {
               order: artwork.order,
               coverImage: artwork.coverImage,
               extraImages: artwork.extraImages,
+              collocation: artwork.collocation,
+              link: artwork.link,
             }),
           });
           if (updateError) {
@@ -210,7 +199,6 @@ export default function Page() {
       setCourse(courseData.course);
       form.reset({ title: courseData.course.title, description: courseData.course.description || "" });
       setHasArtworkChanges(false);
-      setArtworksToDelete([]); // Clear the deletion queue after successful save
     } finally {
       setIsSaving(false);
     }
@@ -255,7 +243,7 @@ export default function Page() {
     }
   };
 
-  const handleArtworkChange = (artworkId: string, field: 'title' | 'description' | 'author' | 'order' | 'coverImage' | 'extraImages', value: string | number | string[]) => {
+  const handleArtworkChange = (artworkId: string, field: 'title' | 'description' | 'author' | 'order' | 'coverImage' | 'extraImages' | 'collocation' | 'link', value: string | number | string[]) => {
     setArtworks(prevArtworks => {
       const updatedArtworks = prevArtworks.map((a) =>
         a.id === artworkId ? { ...a, [field]: value } : a
@@ -289,12 +277,23 @@ export default function Page() {
     setHasArtworkChanges(true);
   };
 
-  const handleDeleteArtwork = (artworkId: string) => {
-    setArtworksToDelete(prev => [...prev, artworkId]);
-    setArtworks(prevArtworks => prevArtworks.filter(a => a.id !== artworkId));
-    setHasArtworkChanges(true);
-    setArtworkToDelete(null);
-    onClose();
+  const handleDeleteArtwork = async (artworkId: string) => {
+    try {
+      const { error } = await fetchApi(`/api/artwork/${artworkId}`, {
+        method: "DELETE",
+      });
+
+      if (error) {
+        console.error('Error deleting artwork:', error);
+        return;
+      }
+
+      setArtworks(prevArtworks => prevArtworks.filter(a => a.id !== artworkId));
+      setHasArtworkChanges(true);
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete artwork:', error);
+    }
   };
 
   const handlePublish = async () => {
@@ -311,12 +310,7 @@ export default function Page() {
       }
     } finally {
       setIsPublishing(false);
-      setShowPublishDialog(false);
     }
-  };
-
-  const handlePublishClick = () => {
-    setShowPublishDialog(true);
   };
 
   if (isLoading || !course) {
@@ -335,7 +329,7 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink onClick={() => handleNavigation('/')} className="cursor-pointer">
+                  <BreadcrumbLink onClick={() => handleNavigation('/student')} className="cursor-pointer">
                     <span className="flex items-center">
                       <Notebook size={16} className="mr-2 text-muted-foreground" aria-hidden="true" />
                       <span className="text-muted-foreground">Student View</span>
@@ -364,12 +358,12 @@ export default function Page() {
         <Container className="py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl">Course Editor</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Button 
                 size="lg" 
                 variant={course?.isPublished ? "outline" : "default"}
                 className="hover:cursor-pointer"
-                onClick={handlePublishClick}
+                onClick={handlePublish}
                 disabled={isPublishing}
               >
                 {isPublishing ? (
@@ -537,6 +531,30 @@ export default function Page() {
                             />
                           </div>
                           <div className="space-y-2">
+                            <label htmlFor={`collocation-${artwork.id}`} className="text-sm font-medium block">
+                              Collocation
+                            </label>
+                            <Input
+                              id={`collocation-${artwork.id}`}
+                              value={artwork.collocation || ''}
+                              onChange={(e) => {
+                                handleArtworkChange(artwork.id, 'collocation', e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor={`link-${artwork.id}`} className="text-sm font-medium block">
+                              External Link
+                            </label>
+                            <Input
+                              id={`link-${artwork.id}`}
+                              value={artwork.link || ''}
+                              onChange={(e) => {
+                                handleArtworkChange(artwork.id, 'link', e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
                             <label htmlFor={`images-${artwork.id}`} className="text-sm font-medium block">
                               Images
                             </label>
@@ -636,41 +654,6 @@ export default function Page() {
             onSubmit={handleCreateArtwork}
             onCancel={() => setShowCreateArtworkDialog(false)}
           />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{course?.isPublished ? "Unpublish Course" : "Publish Course"}</DialogTitle>
-            <DialogDescription>
-              {course?.isPublished ? (
-                "Are you sure you want to unpublish this course? All students currently using this course will be kicked out, and only you will be able to see it."
-              ) : (
-                "Are you sure you want to publish this course? Once published, everyone will be able to see and access this course."
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" className="hover:cursor-pointer" onClick={() => setShowPublishDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant={course?.isPublished ? "destructive" : "default"} 
-              className="hover:cursor-pointer" 
-              onClick={handlePublish}
-              disabled={isPublishing}
-            >
-              {isPublishing ? (
-                <>
-                  <LoaderCircle className="animate-spin h-4 w-4" />
-                  {course?.isPublished ? "Unpublishing..." : "Publishing..."}
-                </>
-              ) : (
-                course?.isPublished ? "Unpublish" : "Publish"
-              )}
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </>

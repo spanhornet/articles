@@ -107,7 +107,7 @@ export function TeacherCourseCard({ course, onDelete }: TeacherCourseCardProps) 
                 priority
               />
             ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center">
+              <div className="w-full  h-full bg-muted flex items-center justify-center">
                 <ImageIcon className="h-8 w-8 text-muted-foreground opacity-50" />
               </div>
             )}
@@ -120,7 +120,7 @@ export function TeacherCourseCard({ course, onDelete }: TeacherCourseCardProps) 
               </div>
             ) : (
               <div className="absolute top-2 left-2">
-                <Badge variant="default" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   Unpublished
                 </Badge>

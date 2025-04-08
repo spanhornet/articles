@@ -59,13 +59,14 @@ export const createArtwork = async (req: Request, res: Response) => {
       id: crypto.randomUUID(),
       title: title || "New Artwork",
       description: description || "",
-      author: "Unknown Artist", // Placeholder
+      author: req.body.author || "Unknown Artist",
       coverImage: null,
       extraImages: [], // Empty array as default
       periodTags: [], // Empty array as default
       typeTags: [], // Empty array as default
-      link: "", // Empty string as default
+      link: req.body.link || "", // Use link from request body or default to empty string
       order: req.body.order || 0, // Use order from request body or default to 0
+      collocation: req.body.collocation || "", // Add collocation field with empty string default
       courseId,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -110,7 +111,7 @@ export const createArtwork = async (req: Request, res: Response) => {
 export const updateArtwork = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, author, order, coverImage, extraImages } = req.body;
+    const { title, description, author, order, coverImage, extraImages, collocation } = req.body;
 
     // Validate input
     if (!id) {
@@ -173,6 +174,8 @@ export const updateArtwork = async (req: Request, res: Response) => {
     if (order !== undefined) updateData.order = order;
     if (coverImage !== undefined) updateData.coverImage = coverImage;
     if (extraImages !== undefined) updateData.extraImages = extraImages;
+    if (collocation !== undefined) updateData.collocation = collocation;
+    if (req.body.link !== undefined) updateData.link = req.body.link;
 
     // Update the artwork in the database
     const [updatedArtwork] = await db.update(schema.artworks)
