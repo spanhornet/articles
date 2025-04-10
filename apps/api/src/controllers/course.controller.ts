@@ -525,3 +525,63 @@ export const deleteCourse = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getAllPublishedCourses = async (req: Request, res: Response) => {
+  try {
+    // Get all published courses
+    const courses = await db.select()
+    .from(schema.courses)
+    .where(eq(schema.courses.isPublished, true))
+    .orderBy(desc(schema.courses.publishedAt || schema.courses.createdAt));
+
+    // Get artworks for each course
+    const coursesWithArtworks = await Promise.all(
+      courses.map(async (course) => {
+        // Get artworks for this specific course
+        const artworks = await db.select({
+          id: schema.artworks.id,
+          title: schema.artworks.title,
+          description: schema.artworks.description,
+          coverImage: schema.artworks.coverImage,
+          createdAt: schema.artworks.createdAt
+        })
+        .from(schema.artworks)
+        .where(eq(schema.artworks.courseId, course.id))
+        .orderBy(schema.artworks.createdAt);
+
+        // Get teacher info
+        const [teacher] = await db.select({
+          id: schema.users.id,
+          name: schema.users.name
+        })
+        .from(schema.users)
+        .where(eq(schema.users.id, course.userId))
+        .limit(1);
+
+        // Return course with its artworks and teacher info
+        return {
+          ...course,
+          artworksCount: artworks.length,
+          artworks: artworks.length > 0 ? [artworks[0]] : [], // Only return first artwork as preview
+          teacher: teacher || { name: "Unknown Teacher" }
+        };
+      })
+    );
+
+    return res.status(200).json({
+      title: "Published Courses",
+      message: "All published courses retrieved successfully",
+      courses: coursesWithArtworks
+    });
+
+  } catch (error: any) {
+    console.error("Get published courses error:", error);
+    
+    // Generic error handler
+    return res.status(500).json({
+      title: "Server Error",
+      message: "An error occurred while retrieving published courses",
+      details: process.env.ENVIRONMENT === "DEVELOPMENT" ? { error: error.message } : undefined
+    });
+  }
+};

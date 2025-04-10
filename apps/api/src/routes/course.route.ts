@@ -8,7 +8,8 @@ import {
   updateCourse,
   getAllCoursesByUserId,
   deleteCourse,
-  updateCoursePublishStatus
+  updateCoursePublishStatus,
+  getAllPublishedCourses
 } from "../controllers/course.controller";
 
 // Router
@@ -21,6 +22,9 @@ const asyncHandler = (fn: Function) => (req: express.Request, res: express.Respo
 
 // Get all courses for the current user
 router.get("/", asyncHandler(getAllCoursesByUserId));
+
+// Get all published courses (for students)
+router.get("/published", asyncHandler(getAllPublishedCourses));
 
 // Get a course by ID
 router.get("/:courseId", asyncHandler(getCourseById));
