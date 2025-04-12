@@ -15,6 +15,8 @@ import { userRouter } from './routes/users.route';
 import { courseRouter } from './routes/course.route';
 import { artworkRouter } from './routes/artwork.route';
 import { imageRouter } from './routes/image.route';
+import { enrollmentRouter } from './routes/enrollment.route';
+import { artworkProgressRouter } from './routes/artworkProgress.route';
 dotenv.config();
 
 const app = express();
@@ -75,6 +77,8 @@ app.use('/api/user', userRouter);
 app.use('/api/course', courseRouter);
 app.use('/api/artwork', artworkRouter);
 app.use('/api/image', imageRouter);
+app.use('/api/enrollment', enrollmentRouter);
+app.use('/api/progress', artworkProgressRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -16,7 +16,7 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  email: varchar("email", { length: 256 }).unique().notNull(),
+  email: varchar("email", { length: 256 }).default(""),
   emailVerified: boolean("email_verified").notNull().default(false),
   phone: varchar("phone", { length: 256 }),
   role: userRoleEnum("role").notNull().default("STUDENT"),
@@ -89,6 +89,29 @@ export const artworks = pgTable("artworks", {
   courseId: text("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
 });
 
+export const enrollments = pgTable("enrollments", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  courseId: text("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  completedAt: timestamp("completed_at"),
+  progress: integer("progress").notNull().default(0), // Percentage of completion
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const artworkProgress = pgTable("artwork_progress", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  artworkId: text("artwork_id").notNull().references(() => artworks.id, { onDelete: "cascade" }),
+  enrollmentId: text("enrollment_id").notNull().references(() => enrollments.id, { onDelete: "cascade" }),
+  isCompleted: boolean("is_completed").notNull().default(false),
+  viewedAt: timestamp("viewed_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Don't forget to update the schema export
 export const schema = {
   users: users,
   sessions: sessions,
@@ -96,4 +119,6 @@ export const schema = {
   verifications: verifications,
   courses: courses,
   artworks: artworks,
+  enrollments: enrollments,
+  artworkProgress: artworkProgress,
 };
