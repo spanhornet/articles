@@ -14,7 +14,7 @@ export async function uploadImageToR2(file: Buffer, contentType: string, headers
 
   // Generate a unique key for the image
   const key = `uploads/${crypto.randomUUID()}-${Date.now()}`;
-  
+
   try {
     console.log('Uploading image to R2:', {
       bucket: CLOUDFLARE_R2_BUCKET_NAME,
@@ -31,18 +31,20 @@ export async function uploadImageToR2(file: Buffer, contentType: string, headers
       Body: file,
       ContentType: contentType,
     }));
-    
+
     // Return the URL to the uploaded image
     // Remove any existing https:// prefix from the public URL to avoid duplication
     const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL?.replace(/^https?:\/\//, '') || '';
-    const finalUrl = `https://${publicUrl}/${CLOUDFLARE_R2_BUCKET_NAME}/${key}`;
-    
+    console.log('Public URL:', publicUrl);
+    const finalUrl = `https://${publicUrl}/${key}`;
+    console.log('Final URL:', finalUrl);
+
     console.log('Image uploaded successfully:', {
       finalUrl,
       key,
       publicUrl
     });
-    
+
     return finalUrl;
   } catch (error) {
     console.error('Error uploading image to R2:', {
@@ -69,12 +71,12 @@ export async function deleteImageFromR2(imageUrl: string, headers: Record<string
     // Extract the key from the image URL
     const url = new URL(imageUrl);
     const key = url.pathname.substring(1); // Remove the leading slash
-    
+
     // Delete the image from R2
     await r2Client.send(new DeleteObjectCommand({
       Bucket: CLOUDFLARE_R2_BUCKET_NAME,
       Key: key,
-    })); 
+    }));
   } catch (error) {
     console.error('Error deleting image from R2:', error);
     throw new Error('Failed to delete image');

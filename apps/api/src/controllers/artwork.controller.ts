@@ -80,7 +80,7 @@ export const createArtwork = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Create artwork error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -191,7 +191,7 @@ export const updateArtwork = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Update artwork error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -254,6 +254,8 @@ export const getArtworksByCourse = async (req: Request, res: Response) => {
       ))
       .limit(1);
 
+    console.log(course)
+
     if (!course) {
       return res.status(404).json({
         title: "Not Found",
@@ -268,6 +270,7 @@ export const getArtworksByCourse = async (req: Request, res: Response) => {
       .where(eq(schema.artworks.courseId, courseId))
       .orderBy(schema.artworks.order);
 
+
     return res.status(200).json({
       title: "Artworks Retrieved",
       message: "Artworks have been retrieved successfully",
@@ -275,8 +278,7 @@ export const getArtworksByCourse = async (req: Request, res: Response) => {
     });
 
   } catch (error: any) {
-    console.error("Get artworks error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -353,7 +355,7 @@ export const deleteArtwork = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Delete artwork error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({

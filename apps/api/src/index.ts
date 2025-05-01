@@ -32,7 +32,12 @@ const logger = pinoHttp({
   transport: {
     target: 'pino-pretty',
     options: {
-      colorize: true
+      colorize: true,
+      singleLine: true,
+      messageFormat: '{msg}',
+      ignore: 'pid,hostname',
+      translateTime: 'HH:MM:ss',
+      minimumLevel: 'info'
     }
   }
 });
@@ -50,19 +55,19 @@ app.use(
   cors({
     // Allow request from your Next.js frontend
     origin: "http://localhost:3000",
-    
+
     // Specify allowed methods
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    
+
     // Allow credentials (cookies, authorization headers)
     credentials: true,
-    
+
     // Allow these headers to be sent
     allowedHeaders: ['Content-Type', 'Authorization'],
-    
+
     // Expose these headers to the browser
     exposedHeaders: ['Set-Cookie'],
-    
+
     // Pre-flight requests will be cached for 1 hour
     maxAge: 3600
   })

@@ -1,37 +1,29 @@
 {
   "name": "@repo/database",
-  "version": "0.0.0",
-  "private": true,
-  "license": "MIT",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "publishConfig": {
-    "access": "public"
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "db:push": "pnpm drizzle-kit push",
+    "db:generate": "pnpm drizzle-kit generate",
+    "db:migrate": "pnpm drizzle-kit migrate"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
-    "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
-  },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.29.4",
-    "kysely": "0.27.2",
-    "pg": "^8.11.3",
-    "postgres": "3.4.3"
-  },
-  "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "drizzle-kit": "0.20.14",
-    "eslint": "8.56.0",
-    "tsup": "8.0.2",
-    "tsx": "4.7.1",
-    "typescript": "5.3.3"
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.42.0",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.19.3"
   }
 }

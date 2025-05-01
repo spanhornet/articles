@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 // Drizzle ORM
 import { db, schema } from "@repo/database";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 // Better-Auth
 import { auth } from "../auth";
@@ -43,7 +43,7 @@ export const createCourse = async (req: Request, res: Response) => {
     }
 
     // Create the course in the database
-    const [ course ] = await db.insert(schema.courses).values({
+    const [course] = await db.insert(schema.courses).values({
       id: crypto.randomUUID(), // Generate a unique ID for the course
       title,
       description,
@@ -58,7 +58,7 @@ export const createCourse = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Create course error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -114,7 +114,7 @@ export const getCourseById = async (req: Request, res: Response) => {
     }
 
     // Get the course from the database
-    const [ course ] = await db.select().from(schema.courses)
+    const [course] = await db.select().from(schema.courses)
       .where(and(
         eq(schema.courses.id, courseId),
         eq(schema.courses.userId, session.user.id)
@@ -138,7 +138,7 @@ export const getCourseById = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Get course error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -236,7 +236,7 @@ export const updateCourse = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Update course error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -338,7 +338,7 @@ export const updateCoursePublishStatus = async (req: Request, res: Response) => 
 
   } catch (error: any) {
     console.error("Update course publish status error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -382,9 +382,9 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
       updatedAt: schema.courses.updatedAt,
       isPublished: schema.courses.isPublished
     })
-    .from(schema.courses)
-    .where(eq(schema.courses.userId, session.user.id))
-    .orderBy(desc(schema.courses.createdAt));
+      .from(schema.courses)
+      .where(eq(schema.courses.userId, schema.user.id))
+      .orderBy(desc(schema.courses.createdAt));
 
     // If there are no courses, return early with empty array
     if (courses.length === 0) {
@@ -408,9 +408,9 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
           updatedAt: schema.artworks.updatedAt,
           courseId: schema.artworks.courseId
         })
-        .from(schema.artworks)
-        .where(eq(schema.artworks.courseId, course.id))
-        .orderBy(schema.artworks.createdAt);
+          .from(schema.artworks)
+          .where(eq(schema.artworks.courseId, course.id))
+          .orderBy(schema.artworks.createdAt);
 
         // Return course with its artworks
         return {
@@ -429,7 +429,7 @@ export const getAllCoursesByUserId = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Get courses error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -507,7 +507,7 @@ export const deleteCourse = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Delete course error:", error);
-    
+
     // Handle specific errors from Better-Auth
     if (error instanceof APIError) {
       return res.status(error.statusCode).json({
@@ -530,9 +530,9 @@ export const getAllPublishedCourses = async (req: Request, res: Response) => {
   try {
     // Get all published courses
     const courses = await db.select()
-    .from(schema.courses)
-    .where(eq(schema.courses.isPublished, true))
-    .orderBy(desc(schema.courses.publishedAt || schema.courses.createdAt));
+      .from(schema.courses)
+      .where(eq(schema.courses.isPublished, true))
+      .orderBy(desc(schema.courses.publishedAt || schema.courses.createdAt));
 
     // Get artworks for each course
     const coursesWithArtworks = await Promise.all(
@@ -545,18 +545,18 @@ export const getAllPublishedCourses = async (req: Request, res: Response) => {
           coverImage: schema.artworks.coverImage,
           createdAt: schema.artworks.createdAt
         })
-        .from(schema.artworks)
-        .where(eq(schema.artworks.courseId, course.id))
-        .orderBy(schema.artworks.createdAt);
+          .from(schema.artworks)
+          .where(eq(schema.artworks.courseId, course.id))
+          .orderBy(schema.artworks.createdAt);
 
         // Get teacher info
         const [teacher] = await db.select({
           id: schema.users.id,
           name: schema.users.name
         })
-        .from(schema.users)
-        .where(eq(schema.users.id, course.userId))
-        .limit(1);
+          .from(schema.users)
+          .where(eq(schema.users.id, course.userId))
+          .limit(1);
 
         // Return course with its artworks and teacher info
         return {
@@ -576,7 +576,7 @@ export const getAllPublishedCourses = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error("Get published courses error:", error);
-    
+
     // Generic error handler
     return res.status(500).json({
       title: "Server Error",

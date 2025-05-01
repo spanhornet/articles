@@ -18,61 +18,9 @@ export default function Layout({
   return (
     <AuthGuard authRequired allowedRoles={["STUDENT", "TEACHER"]} redirectTo="/sign-in">
       <div className="flex min-h-screen flex-col">
-        <header className="border-b">
-          <Container className="py-6">
-            <div className="flex items-center justify-between">
-              <Link href="/student" className="text-xl font-medium">
-                Articles
-              </Link>
-              <div className="flex items-center space-x-2">
-                <ModeToggle />
-                <UserDropdown />
-              </div>
-            </div>
-          </Container>
-        </header>
-        
         <main className="flex-1">
           {children}
         </main>
-        
-        <footer className="border-t bg-background mt-auto">
-          <Container className="py-6">
-            <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
-              <div className="text-sm text-muted-foreground">
-                © 2025 Articles. All rights reserved.
-              </div>
-              <nav>
-                <ul className="flex flex-wrap gap-6 text-sm">
-                  <li>
-                    <Link
-                      href="/terms"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Terms & Conditions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/privacy"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/cookies"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Cookie Policy
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          </Container>
-        </footer>
       </div>
     </AuthGuard>
   );

@@ -36,7 +36,7 @@ export function ImageUploader({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevImagesRef = useRef<UploadedImage[]>(initialImages);
-  
+
   // Track if we're dragging files over the component
   const [isDragging, setIsDragging] = useState(false);
 
@@ -57,7 +57,7 @@ export function ImageUploader({
   const uploadFileToR2 = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     try {
       const { data, error } = await fetchApi<{ imageUrl: string }>('/api/image/upload', {
         method: 'POST',
@@ -67,46 +67,47 @@ export function ImageUploader({
         },
         showSuccessToast: false,
       });
-      
+
       if (error) {
         throw new Error(error.message);
       }
-      
+
       if (!data?.imageUrl) {
         throw new Error('No image URL returned from server');
       }
-      
+
+      // Return the URL directly as provided by the server
       return data.imageUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Error uploading image');
       throw error;
     }
-  };  
-  
+  };
+
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
+
     const remainingSlots = maxImages - images.length;
-    
+
     if (remainingSlots <= 0) {
       toast.error("Maximum images reached", {
         description: `You can only upload up to ${maxImages} images`,
       });
       return;
     }
-    
+
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
-    
+
     // Check if we're ignoring some files due to the limit
     if (files.length > remainingSlots) {
       toast.info("Some images weren't added", {
         description: `Only added ${remainingSlots} out of ${files.length} images due to the ${maxImages} image limit.`,
       });
     }
-    
+
     setIsUploading(true);
-    
+
     // Process each file
     for (const file of filesToProcess) {
       // Check file type
@@ -116,40 +117,40 @@ export function ImageUploader({
         });
         continue;
       }
-      
+
       try {
         // Upload to R2 and get the URL
         const imageUrl = await uploadFileToR2(file);
-        
+
         // Add the image to our state
         const newImage: UploadedImage = {
           id: crypto.randomUUID(),
           url: imageUrl,
           isCover: images.length === 0 && initialImages.length === 0, // First image is cover by default
         };
-        
+
         setImages(prevImages => {
           const updatedImages = [...prevImages, newImage];
           return updatedImages;
         });
-        
+
       } catch (error) {
         console.error('Error processing image:', error);
       }
     }
-    
+
     setIsUploading(false);
-    
+
     // Reset the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
-  
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleImageUpload(e.target.files);
   };
-  
+
   const handleSetCover = (id: string) => {
     const updatedImages = images.map(img => ({
       ...img,
@@ -158,26 +159,26 @@ export function ImageUploader({
     updateImages(updatedImages);
     toast.success("Cover image updated");
   };
-  
+
   const handleDelete = async (id: string) => {
     // Find the image
     const imageToDelete = images.find(img => img.id === id);
     if (!imageToDelete) return;
-    
+
     // Check if we're deleting the cover image
     const isDeletedImageCover = imageToDelete.isCover;
-    
+
     // Remove the image from local state
     const updatedImages = images.filter(img => img.id !== id);
-    
+
     // If we deleted the cover and we have other images, set the first one as cover
     if (isDeletedImageCover && updatedImages.length > 0) {
       updatedImages[0].isCover = true;
     }
-    
+
     // Update the state
     updateImages(updatedImages);
-    
+
     try {
       // Delete from R2 if we have a URL (not a local file)
       if (imageToDelete.url && !imageToDelete.url.startsWith('data:')) {
@@ -187,45 +188,45 @@ export function ImageUploader({
           showSuccessToast: false,
         });
       }
-      
+
       toast.success("Image removed");
     } catch (error) {
       console.error('Error deleting image:', error);
       toast.error('Error removing image');
     }
-  };  
-  
+  };
+
   // Handle drag events for drag & drop functionality
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
-  
+
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
-  
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
-  
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     handleImageUpload(files);
   };
-  
+
   const openFileDialog = () => {
     fileInputRef.current?.click();
   };
-  
+
   return (
     <div className={cn("w-full", className)}>
       <div
@@ -255,7 +256,7 @@ export function ImageUploader({
                         fill
                         className="object-cover rounded-md"
                       />
-                      
+
                       <div className="absolute top-2 right-2 flex gap-1">
                         <Button
                           variant="secondary"
@@ -289,9 +290,9 @@ export function ImageUploader({
                     </AspectRatio>
                   </div>
                 ))}
-                
+
                 {images.length < maxImages && (
-                  <div 
+                  <div
                     className="relative flex-shrink-0 w-48"
                     onClick={openFileDialog}
                   >

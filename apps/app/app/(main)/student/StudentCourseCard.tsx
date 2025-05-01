@@ -81,7 +81,7 @@ export function StudentCourseCard({ course, enrollment, onEnroll, onStudy }: Stu
             </div>
           )}
         </div>
-        
+
         {isEnrolled && (
           <div className="w-full absolute -bottom-1">
             <Progress value={progress} className="h-1.5 rounded-none" />
@@ -96,20 +96,8 @@ export function StudentCourseCard({ course, enrollment, onEnroll, onStudy }: Stu
               {course.artworksCount} {course.artworksCount === 1 ? 'artwork' : 'artworks'}
             </Badge>
           )}
-          
-          {isEnrolled && progress > 0 && (
-            <Badge variant={isCompleted ? "default" : "outline"} className="ml-2">
-              {isCompleted ? (
-                <span className="flex items-center">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Completed
-                </span>
-              ) : (
-                <span>{progress}% Complete</span>
-              )}
-            </Badge>
-          )}
         </div>
-        
+
         <h3 className="text-lg font-semibold mb-2 line-clamp-2">{course.title}</h3>
         <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
       </CardContent>
@@ -121,8 +109,8 @@ export function StudentCourseCard({ course, enrollment, onEnroll, onStudy }: Stu
               <Award className="h-4 w-4 mr-1.5" />
               <span>{progress}% Completed</span>
             </div>
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               className="gap-1 cursor-pointer"
               onClick={handleStudy}
             >
@@ -130,7 +118,7 @@ export function StudentCourseCard({ course, enrollment, onEnroll, onStudy }: Stu
             </Button>
           </div>
         ) : (
-          <Button 
+          <Button
             className="w-full hover:cursor-pointer hover:bg-primary/90 transition-colors"
             onClick={handleEnroll}
             disabled={isEnrolling}
